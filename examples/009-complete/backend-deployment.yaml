@@ -17,17 +17,9 @@ spec:
         - name: api
           image: hashicorp/http-echo:latest
           args:
-            - "-text=API Response: Connected to database at \${DB_HOST}, API Key: \${API_KEY}"
+            - "-text=API Response: Connected to database at mysql"
           ports:
             - containerPort: 5678
-          env:
-            - name: DB_HOST
-              value: mysql
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: api-key
           resources:
             limits:
               memory: "256Mi"

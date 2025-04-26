@@ -240,20 +240,22 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
-  labels:
-    app: frontend
 spec:
-  selector:
-    app: frontend
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 80
-    nodePort: 30080
-  type: NodePort
+    protocol: TCP
+  selector:
+    app: frontend
 EOF
 
 # Verify frontend deployment
 kubectl get pods,services -l app=frontend
+
+# Wait for the LoadBalancer to be assigned an external IP
+watch kubectl get services frontend-service
+
 ```
 
 ### Task 9: Implementing Network Policies
@@ -353,14 +355,9 @@ kubectl get networkpolicies
 Now let's verify that our complete application is functioning:
 
 ```bash
-# Get the NodePort service details
-kubectl get service frontend-service
-
-# Get the node IP
-NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
-NODE_PORT=30080
-
-echo "You can access the application at: http://$NODE_IP:$NODE_PORT"
+# Obtain the external IP of the frontend service
+EXTERNAL_IP=$(kubectl get service frontend-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo "Access the frontend at http://$EXTERNAL_IP"
 
 # Check all resources
 kubectl get all
