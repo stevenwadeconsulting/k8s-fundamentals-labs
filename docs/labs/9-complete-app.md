@@ -33,6 +33,9 @@ kubectl create namespace final-app
 
 # Use this namespace for subsequent commands
 kubectl config set-context --current --namespace=final-app
+
+# Move to the correct examples directory
+cd ../009-complete
 ```
 
 ## Lab Tasks
@@ -144,6 +147,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
+  labels:
+    app: mysql
 spec:
   ports:
   - port: 3306
@@ -170,6 +175,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
+  labels:
+    app: backend
 spec:
   selector:
     app: backend
@@ -233,6 +240,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
+  labels:
+    app: frontend
 spec:
   selector:
     app: frontend
