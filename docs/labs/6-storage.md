@@ -21,18 +21,7 @@ By the end of this lab, you will be able to:
 
 - Completion of Lab 5: Horizontal Pod Autoscaling
 - Basic understanding of storage concepts
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../006-storage` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -73,18 +62,7 @@ Let's create a simple PVC using the default storage class:
 
 ```bash
 # Create a basic PVC
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-first-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-EOF
+kubectl apply -f basic-pvc.yaml
 
 # Check the status of your PVC
 kubectl get pvc
@@ -97,7 +75,7 @@ Notice the PVC's status should be "Bound," indicating that a Persistent Volume (
 kubectl get pv
 
 # Get details about the PV that was created
-PV_NAME=$(kubectl get pvc my-first-pvc -o jsonpath='{.spec.volumeName}')
+export PV_NAME=$(kubectl get pvc my-first-pvc -o jsonpath='{.spec.volumeName}')
 kubectl describe pv $PV_NAME
 ```
 
@@ -113,25 +91,7 @@ Now let's create a pod that uses our PVC:
 
 ```bash
 # Create a pod that mounts the PVC
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pvc-demo-pod
-spec:
-  containers:
-  - name: task-pv-container
-    image: nginx
-    ports:
-    - containerPort: 80
-    volumeMounts:
-    - mountPath: "/usr/share/nginx/html"
-      name: task-pv-storage
-  volumes:
-  - name: task-pv-storage
-    persistentVolumeClaim:
-      claimName: my-first-pvc
-EOF
+kubectl apply -f pvc-demo-pod.yaml
 
 # Verify the pod is running
 kubectl get pod pvc-demo-pod
@@ -156,25 +116,7 @@ Let's delete the pod and create a new one to verify that our data persists:
 kubectl delete pod pvc-demo-pod
 
 # Create a new pod that uses the same PVC
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pvc-demo-pod-2
-spec:
-  containers:
-  - name: task-pv-container
-    image: nginx
-    ports:
-    - containerPort: 80
-    volumeMounts:
-    - mountPath: "/usr/share/nginx/html"
-      name: task-pv-storage
-  volumes:
-  - name: task-pv-storage
-    persistentVolumeClaim:
-      claimName: my-first-pvc
-EOF
+kubectl apply -f pvc-demo-pod-2.yaml
 
 # Wait for the pod to be ready
 kubectl wait --for=condition=Ready pod/pvc-demo-pod-2 --timeout=60s
@@ -191,34 +133,10 @@ Now, let's explore using different storage classes for specific needs:
 
 ```bash
 # Create a PVC with XFS file system
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: xfs-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: do-block-storage-xfs
-  resources:
-    requests:
-      storage: 1Gi
-EOF
+kubectl apply -f xfs-pvc.yaml
 
 # Create a PVC with Retain policy
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: retain-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: do-block-storage-retain
-  resources:
-    requests:
-      storage: 1Gi
-EOF
+kubectl apply -f retain-pvc.yaml
 
 # Check all PVCs
 kubectl get pvc
@@ -228,24 +146,7 @@ Let's create a pod to verify the file system type:
 
 ```bash
 # Create a pod to check the XFS file system
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: xfs-demo-pod
-spec:
-  containers:
-  - name: fs-check-container
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - mountPath: "/data"
-      name: xfs-volume
-  volumes:
-  - name: xfs-volume
-    persistentVolumeClaim:
-      claimName: xfs-pvc
-EOF
+kubectl apply -f xfs-demo-pod.yaml
 
 # Wait for the pod to be ready
 kubectl wait --for=condition=Ready pod/xfs-demo-pod --timeout=60s
@@ -277,24 +178,7 @@ The PVC should now show 2Gi for storage. Let's verify the resize in the pod:
 
 ```bash
 # Create a new pod to access the resized volume
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: resize-check-pod
-spec:
-  containers:
-  - name: volume-check
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - mountPath: "/data"
-      name: resized-volume
-  volumes:
-  - name: resized-volume
-    persistentVolumeClaim:
-      claimName: my-first-pvc
-EOF
+kubectl apply -f resize-check-pod.yaml
 
 # Wait for the pod to be ready
 kubectl wait --for=condition=Ready pod/resize-check-pod --timeout=60s
@@ -311,58 +195,10 @@ StatefulSets are designed for stateful applications that need stable, persistent
 
 ```bash
 # Create a headless service for the StatefulSet
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx-headless
-  labels:
-    app: nginx-sts
-spec:
-  ports:
-  - port: 80
-    name: web
-  clusterIP: None
-  selector:
-    app: nginx-sts
-EOF
+kubectl apply -f nginx-headless-service.yaml
 
 # Create a StatefulSet with persistent storage
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: web
-spec:
-  serviceName: "nginx-headless"
-  replicas: 2
-  selector:
-    matchLabels:
-      app: nginx-sts
-  template:
-    metadata:
-      labels:
-        app: nginx-sts
-    spec:
-      containers:
-      - name: nginx
-        image: nginx
-        ports:
-        - containerPort: 80
-          name: web
-        volumeMounts:
-        - name: www
-          mountPath: /usr/share/nginx/html
-  volumeClaimTemplates:
-  - metadata:
-      name: www
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: do-block-storage
-      resources:
-        requests:
-          storage: 1Gi
-EOF
+kubectl apply -f statefulset.yaml
 
 # Check the created StatefulSet
 kubectl get statefulset web
@@ -410,24 +246,7 @@ Let's explore what happens when you delete a PVC with different reclaim policies
 
 ```bash
 # First, create a pod using the retain-pvc
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: retain-pod
-spec:
-  containers:
-  - name: retain-container
-    image: busybox
-    command: ["sleep", "3600"]
-    volumeMounts:
-    - mountPath: "/data"
-      name: retain-volume
-  volumes:
-  - name: retain-volume
-    persistentVolumeClaim:
-      claimName: retain-pvc
-EOF
+kubectl apply -f retain-pod.yaml
 
 # Write some data to the volume
 kubectl exec -it retain-pod -- sh -c "echo 'Important data' > /data/important.txt"
@@ -465,78 +284,13 @@ Now let's create a practical example by deploying a MySQL database with persiste
 kubectl create secret generic mysql-pass --from-literal=password=your-password
 
 # Create a PVC for MySQL data
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-data-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: do-block-storage-xfs-retain
-  resources:
-    requests:
-      storage: 1Gi
-EOF
+kubectl apply -f mysql-data-pvc.yaml
 
 # Deploy MySQL with the PVC
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-spec:
-  selector:
-    matchLabels:
-      app: mysql
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-      - name: mysql
-        image: mysql:5.7
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysql-pass
-              key: password
-        ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: mysql-storage
-          mountPath: /var/lib/mysql
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-      volumes:
-      - name: mysql-storage
-        persistentVolumeClaim:
-          claimName: mysql-data-pvc
-EOF
+kubectl apply -f mysql-deployment.yaml
 
 # Create a service for MySQL
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-spec:
-  ports:
-  - port: 3306
-  selector:
-    app: mysql
-  clusterIP: None
-EOF
+kubectl apply -f mysql-service.yaml
 
 # Check deployment status
 kubectl get deployment mysql

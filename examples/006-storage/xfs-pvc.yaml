@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: xfs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage-xfs
+  resources:
+    requests:
+      storage: 1Gi

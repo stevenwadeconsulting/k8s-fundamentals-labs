@@ -20,7 +20,7 @@ By the end of this lab, you will be able to:
 
 - Access to your assigned Kubernetes cluster
 - Basic familiarity with command-line interfaces
-- `kubectl` command-line tool (pre-installed on your lab environment)
+- Execute `cd ../001-essentials` to navigate to this lab directory
 
 ## Lab Environment Validation
 
@@ -137,20 +137,7 @@ Now that you're familiar with the environment, let's create your first Pod:
 
 ```bash
 # Create a simple nginx pod
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nginx-pod
-  labels:
-    app: nginx
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.21
-    ports:
-    - containerPort: 80
-EOF
+kubectl apply -f nginx-pod.yaml
 ```
 
 Verify the pod is running:

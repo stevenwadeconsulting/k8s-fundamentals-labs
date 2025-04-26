@@ -22,18 +22,7 @@ By the end of this lab, you will be able to:
 - Completion of Lab 1: Initial Kubernetes Exploration
 - Understanding of basic Kubernetes concepts (Pods, namespaces)
 - Basic YAML knowledge
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../002-deployments` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -43,36 +32,7 @@ Let's start by creating a simple Deployment with multiple replicas:
 
 ```bash
 # Create a deployment with 3 replicas
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.20
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
-EOF
+kubectl apply -f deployment.yaml
 ```
 
 Now let's examine what was created:
@@ -224,23 +184,7 @@ First, create a ConfigMap:
 
 ```bash
 # Create a ConfigMap
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-data:
-  app.properties: |
-    environment=production
-    logging.level=info
-  index.html: |
-    <html>
-    <body>
-      <h1>Hello from Kubernetes ConfigMap!</h1>
-      <p>This content is dynamically loaded from a ConfigMap.</p>
-    </body>
-    </html>
-EOF
+kubectl apply -f configmap.yaml
 
 # Verify the ConfigMap
 kubectl get configmap app-config -o yaml
@@ -261,53 +205,7 @@ kubectl get secret app-secrets -o yaml
 Now, create a new Deployment that uses both the ConfigMap and Secret:
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: webserver-deployment
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: webserver
-  template:
-    metadata:
-      labels:
-        app: webserver
-    spec:
-      containers:
-      - name: webserver
-        image: nginx:1.21
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: config-volume
-          mountPath: /usr/share/nginx/html
-        env:
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: db-password
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: api-key
-        - name: ENVIRONMENT
-          valueFrom:
-            configMapKeyRef:
-              name: app-config
-              key: app.properties
-      volumes:
-      - name: config-volume
-        configMap:
-          name: app-config
-          items:
-          - key: index.html
-            path: index.html
-EOF
+kubectl apply -f webserver-deployment.yaml
 ```
 
 Let's verify our configuration is working:

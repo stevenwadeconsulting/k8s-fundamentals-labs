@@ -26,6 +26,7 @@ By the end of this lab, you will be able to:
 
 - Completion of Lab 7: Network Policies
 - Basic understanding of Kubernetes resources and the Kubernetes API
+- Execute `cd ../008-rbac` to navigate to this lab directory
 
 ## Lab Environment Validation
 
@@ -80,16 +81,7 @@ Now, let's create a Role that defines what our service account can do:
 
 ```bash
 # Create a Role that can only read pods and services
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-and-service-reader
-rules:
-- apiGroups: [""]
-  resources: ["pods", "services"]
-  verbs: ["get", "watch", "list"]
-EOF
+kubectl apply -f pod-and-service-reader-role.yaml
 
 # Verify the role was created
 kubectl get roles
@@ -120,20 +112,7 @@ Next, we need to bind our Role to the service account:
 
 ```bash
 # Create a RoleBinding
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: read-pods-and-services
-subjects:
-- kind: ServiceAccount
-  name: app-sa
-  namespace: rbac-test
-roleRef:
-  kind: Role
-  name: pod-and-service-reader
-  apiGroup: rbac.authorization.k8s.io
-EOF
+kubectl apply -f read-pods-and-services-rolebinding.yaml
 
 # Verify the role binding was created
 kubectl get rolebindings
@@ -150,18 +129,7 @@ Now let's create a pod that uses our service account:
 
 ```bash
 # Create a pod that uses our service account
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: rbac-test-pod
-spec:
-  serviceAccountName: app-sa
-  containers:
-  - name: kubectl-container
-    image: bitnami/kubectl:latest
-    command: ["sleep", "3600"]
-EOF
+kubectl apply -f rbac-test-pod.yaml
 
 # Wait for the pod to be ready
 kubectl wait --for=condition=Ready pod/rbac-test-pod --timeout=60s
@@ -195,19 +163,7 @@ Let's update our Role to add more permissions:
 
 ```bash
 # Update the role to also allow access to deployments
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-and-service-reader
-rules:
-- apiGroups: [""]
-  resources: ["pods", "services"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: ["apps"]
-  resources: ["deployments"]
-  verbs: ["get", "watch", "list"]
-EOF
+kubectl apply -f pod-and-service-reader-role-v2.yaml
 
 # Verify the updated role
 kubectl describe role pod-and-service-reader
@@ -237,32 +193,10 @@ Sometimes you need permissions that span across all namespaces. Let's create a C
 
 ```bash
 # Create a ClusterRole to read nodes
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: node-reader
-rules:
-- apiGroups: [""]
-  resources: ["nodes"]
-  verbs: ["get", "watch", "list"]
-EOF
+kubectl apply -f node-reader-clusterrole.yaml
 
 # Create a ClusterRoleBinding for our service account
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: read-nodes
-subjects:
-- kind: ServiceAccount
-  name: app-sa
-  namespace: rbac-test
-roleRef:
-  kind: ClusterRole
-  name: node-reader
-  apiGroup: rbac.authorization.k8s.io
-EOF
+kubectl apply -f read-nodes-clusterrolebinding.yaml
 
 # Check the ClusterRole and ClusterRoleBinding
 kubectl get clusterrole node-reader
@@ -306,20 +240,7 @@ Let's create a RoleBinding that gives our service account view-only access to mo
 
 ```bash
 # Create a RoleBinding to the view ClusterRole
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: app-sa-view
-subjects:
-- kind: ServiceAccount
-  name: app-sa
-  namespace: rbac-test
-roleRef:
-  kind: ClusterRole
-  name: view
-  apiGroup: rbac.authorization.k8s.io
-EOF
+kubectl apply -f app-sa-view-rolebinding.yaml
 ```
 
 Let's test this new access:
@@ -339,28 +260,7 @@ Service accounts are often used with Deployments. Let's create a Deployment that
 
 ```bash
 # Create a Deployment that uses our service account
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: rbac-test-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: rbac-test-app
-  template:
-    metadata:
-      labels:
-        app: rbac-test-app
-    spec:
-      serviceAccountName: app-sa
-      containers:
-      - name: nginx
-        image: nginx
-        ports:
-        - containerPort: 80
-EOF
+kubectl apply -f rbac-test-app-deployment.yaml
 
 # Check that the deployment was created
 kubectl get deployments
@@ -369,72 +269,7 @@ kubectl get pods -l app=rbac-test-app
 
 Each pod in this deployment will use the `app-sa` service account, giving them the permissions we've defined.
 
-### Task 12: RBAC Best Practices
-
-Here are some RBAC best practices to keep in mind:
-
-1. **Follow the Principle of Least Privilege**: Grant only the permissions necessary for a workload to function
-2. **Use Namespaces for Isolation**: Separate workloads into different namespaces and use namespace-specific roles
-3. **Prefer Roles over ClusterRoles**: Use namespace-scoped Roles when possible
-4. **Create Specific, Focused Roles**: Create multiple specific roles rather than one all-encompassing role
-5. **Regularly Audit RBAC Resources**: Review and clean up unused RBAC resources
-6. **Use Default Roles When Appropriate**: Reuse the default view, edit, and admin roles
-7. **Avoid Direct Cluster-Admin Access**: Limit the use of cluster-admin privileges
-
-Let's create a ConfigMap to document these best practices:
-
-```bash
-# Create a ConfigMap with RBAC best practices
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: rbac-best-practices
-data:
-  best-practices.yaml: |
-    # RBAC Best Practices
-
-    ## 1. Follow the Principle of Least Privilege
-    - Grant only the minimal permissions required for workloads to function
-    - Start with read-only permissions and add write permissions only when necessary
-    - Scope permissions to specific resources rather than using wildcards
-
-    ## 2. Use Namespaces for Isolation
-    - Create separate namespaces for different teams or applications
-    - Use namespace-specific Roles and RoleBindings
-    - Implement ResourceQuotas and LimitRanges per namespace
-
-    ## 3. Prefer Roles over ClusterRoles
-    - Use namespace-scoped Roles when possible
-    - Reserve ClusterRoles for cluster-wide resources or shared permissions
-    - Bind ClusterRoles to specific namespaces using RoleBindings when possible
-
-    ## 4. Create Specific, Focused Roles
-    - Create multiple specific roles rather than one all-encompassing role
-    - Group permissions logically based on function or use case
-    - Name roles descriptively to indicate their purpose
-
-    ## 5. Regularly Audit RBAC Resources
-    - Review and clean up unused service accounts, roles, and bindings
-    - Audit cluster-wide permissions regularly
-    - Implement processes for reviewing RBAC changes
-
-    ## 6. Use Default Roles When Appropriate
-    - Reuse the default view, edit, and admin roles
-    - Extend default roles with aggregation when needed
-    - Understand the permissions included in default roles
-
-    ## 7. Avoid Direct Cluster-Admin Access
-    - Limit the use of cluster-admin privileges
-    - Create specific admin roles for different operational needs
-    - Implement break-glass procedures for emergency access
-EOF
-
-# View the best practices
-kubectl get configmap rbac-best-practices -o yaml
-```
-
-### Task 13: Inspecting RBAC with kubectl auth
+### Task 12: Inspecting RBAC with kubectl auth
 
 Kubernetes provides the `kubectl auth` command to help you understand and troubleshoot RBAC configurations:
 
@@ -454,7 +289,7 @@ kubectl auth can-i get pods --as=system:serviceaccount:rbac-test:app-sa --namesp
 
 These commands help you verify what actions a service account is allowed to perform without having to actually attempt those actions.
 
-### Task 14: RBAC Troubleshooting
+### Task 13: RBAC Troubleshooting
 
 When working with RBAC, you might encounter permission issues. Here's how to troubleshoot them:
 
@@ -471,18 +306,7 @@ Let's create a pod with deliberately incorrect permissions to practice troublesh
 kubectl create serviceaccount troubleshoot-sa
 
 # Create a pod that uses this service account
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: troubleshoot-pod
-spec:
-  serviceAccountName: troubleshoot-sa
-  containers:
-  - name: kubectl-container
-    image: bitnami/kubectl:latest
-    command: ["sleep", "3600"]
-EOF
+kubectl apply -f troubleshoot-pod.yaml
 
 # Wait for the pod to be ready
 kubectl wait --for=condition=Ready pod/troubleshoot-pod --timeout=60s
@@ -498,35 +322,13 @@ Now let's diagnose and fix the issue:
 kubectl auth can-i get pods --as=system:serviceaccount:rbac-test:troubleshoot-sa
 
 # Create a minimal role and binding
-cat <<EOF | kubectl apply -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-reader
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: read-pods
-subjects:
-- kind: ServiceAccount
-  name: troubleshoot-sa
-  namespace: rbac-test
-roleRef:
-  kind: Role
-  name: pod-reader
-  apiGroup: rbac.authorization.k8s.io
-EOF
+kubectl apply -f pod-reader-rbac.yaml
 
 # Try again to list pods (should now work)
 kubectl exec -it troubleshoot-pod -- kubectl get pods
 ```
 
-### Task 15: Cleanup
+### Task 14: Cleanup
 
 Before moving on, let's clean up the resources we created:
 
@@ -584,6 +386,18 @@ Congratulations! You have completed Lab 8 of the Kubernetes Fundamentals Worksho
 8. How to troubleshoot RBAC issues
 
 RBAC is a critical security feature in Kubernetes that allows you to control who can access the Kubernetes API and what actions they can perform. Understanding and properly implementing RBAC is essential for securing your Kubernetes clusters in production environments.
+
+## Best Practices
+
+Here are some RBAC best practices to keep in mind:
+
+1. **Follow the Principle of Least Privilege**: Grant only the permissions necessary for a workload to function
+2. **Use Namespaces for Isolation**: Separate workloads into different namespaces and use namespace-specific roles
+3. **Prefer Roles over ClusterRoles**: Use namespace-scoped Roles when possible
+4. **Create Specific, Focused Roles**: Create multiple specific roles rather than one all-encompassing role
+5. **Regularly Audit RBAC Resources**: Review and clean up unused RBAC resources
+6. **Use Default Roles When Appropriate**: Reuse the default view, edit, and admin roles
+7. **Avoid Direct Cluster-Admin Access**: Limit the use of cluster-admin privileges
 
 ## Next Steps
 

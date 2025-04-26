@@ -45,6 +45,7 @@ Each participant will have access to a pre-configured two-node Kubernetes cluste
    ```bash
    git clone https://github.com/stevenwadeconsulting/k8s-fundamentals-labs.git
    cd k8s-fundamentals-labs
+   cd examples
    ```
 
 ## Workshop Labs
@@ -116,9 +117,9 @@ Each lab includes four key sections:
 
 ## Additional Resources
 
-- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/)
-- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/)
+- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/){target="_blank"}
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/){target="_blank"}
+- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/){target="_blank"}
 
 ## Troubleshooting
 
@@ -140,7 +141,7 @@ If you encounter any issues during the labs:
 
 ## Feedback
 
-Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our feedback form.
+Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our [feedback form](https://forms.gle/HxoVhSZRNk49BweS9){target="_blank"}.
 
 Your input helps us improve future workshops and develop new content based on your needs and interests.
 

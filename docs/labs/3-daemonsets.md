@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll explore DaemonSets, a specialized Kubernetes workload resource that ensures that a copy of a Pod runs on every node in the cluster (or a subset of nodes). Unlike Deployments, which are designed to run a specified number of replicas, DaemonSets are node-centric.
+In this lab, you'll explore DaemonSets, a specialised Kubernetes workload resource that ensures that a copy of a Pod runs on every node in the cluster (or a subset of nodes). Unlike Deployments, which are designed to run a specified number of replicas, DaemonSets are node-centric.
 
 DaemonSets are particularly useful for infrastructure-related workloads like monitoring agents, log collectors, and network plugins—cases where you need exactly one instance of a service per node.
 
@@ -14,24 +14,13 @@ By the end of this lab, you will be able to:
 - Create and manage basic DaemonSets
 - Update DaemonSets with rolling updates
 - Use node selectors to control DaemonSet scheduling
-- Compare the behavior of DaemonSets with Deployments
+- Compare the behaviour of DaemonSets with Deployments
 
 ## Prerequisites
 
 - Completion of Lab 2: Deployments and Rolling Updates
 - Understanding of basic Kubernetes concepts
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../003-daemonsets` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -52,41 +41,7 @@ Let's create a DaemonSet that simulates a node monitoring agent:
 
 ```bash
 # Create a simple DaemonSet
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: node-monitor
-  labels:
-    app: node-monitor
-spec:
-  selector:
-    matchLabels:
-      app: node-monitor
-  template:
-    metadata:
-      labels:
-        app: node-monitor
-    spec:
-      containers:
-      - name: node-monitor
-        image: busybox:1.28
-        command:
-        - /bin/sh
-        - -c
-        - >
-          while true; do
-            echo "Monitoring node $(hostname) at $(date)"
-            sleep 300
-          done
-        resources:
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-          requests:
-            memory: "32Mi"
-            cpu: "50m"
-EOF
+kubectl apply -f node-monitor-daemonset.yaml
 ```
 
 Now, let's verify that the DaemonSet was created and that it deployed pods to all nodes:
@@ -216,46 +171,10 @@ You should now see that the DaemonSet pods are only running on the node that mat
 
 ### Task 6: DaemonSets vs. Deployments Comparison
 
-Let's create a Deployment with the same number of replicas as we have nodes to compare the behavior:
+Let's create a Deployment with the same number of replicas as we have nodes to compare the behaviour:
 
 ```bash
-# First, count our nodes
-NODE_COUNT=$(kubectl get nodes --no-headers | wc -l)
-echo "Node count: $NODE_COUNT"
-
-# Create a Deployment with the same replica count as nodes
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: comparison-deployment
-  labels:
-    app: comparison
-spec:
-  replicas: $NODE_COUNT
-  selector:
-    matchLabels:
-      app: comparison
-  template:
-    metadata:
-      labels:
-        app: comparison
-    spec:
-      containers:
-      - name: busybox
-        image: busybox:1.28
-        command:
-        - /bin/sh
-        - -c
-        - "while true; do echo Running on \$(hostname); sleep 300; done"
-        resources:
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-          requests:
-            memory: "32Mi"
-            cpu: "50m"
-EOF
+kubectl apply -f comparision-deployment.yaml
 ```
 
 Now, let's compare where the pods are scheduled:
@@ -277,11 +196,15 @@ Notice the key differences:
 Let's simulate a node failure by cordoning a node (marking it as unschedulable):
 
 ```bash
+# Get the name of one of your nodes
+NODE_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+echo $NODE_NAME
+
 # Cordon the first node (mark as unschedulable)
 kubectl cordon $NODE_NAME
 
 # Scale up our deployment by 1
-kubectl scale deployment comparison-deployment --replicas=$((NODE_COUNT+1))
+kubectl scale deployment comparison-deployment --replicas=3
 
 # Check where the new pod is scheduled
 kubectl get pods -l app=comparison -o wide
@@ -300,50 +223,7 @@ Let's create a more realistic DaemonSet example that simulates a log collector:
 
 ```bash
 # Create a log collector DaemonSet
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: log-collector
-  labels:
-    app: log-collector
-spec:
-  selector:
-    matchLabels:
-      app: log-collector
-  template:
-    metadata:
-      labels:
-        app: log-collector
-    spec:
-      containers:
-      - name: collector
-        image: busybox:1.28
-        command:
-        - /bin/sh
-        - -c
-        - >
-          while true; do
-            echo "Collecting logs from node $(hostname) at $(date)"
-            # In a real scenario, we'd collect logs here
-            sleep 60
-          done
-        volumeMounts:
-        - name: varlog
-          mountPath: /var/log
-          readOnly: true
-        resources:
-          limits:
-            memory: "100Mi"
-            cpu: "100m"
-          requests:
-            memory: "50Mi"
-            cpu: "50m"
-      volumes:
-      - name: varlog
-        hostPath:
-          path: /var/log
-EOF
+kubectl apply -f log-collector-ds.yaml
 ```
 
 This DaemonSet simulates a log collector that mounts the host's `/var/log` directory.

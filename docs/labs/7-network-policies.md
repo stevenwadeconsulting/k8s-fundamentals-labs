@@ -24,18 +24,7 @@ By the end of this lab, you will be able to:
 
 - Completion of Lab 6: Persistent Storage
 - Understanding of basic Kubernetes concepts including namespaces and labels
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../007-network-policies` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -62,74 +51,16 @@ kubectl create namespace netpol-test
 kubectl config set-context --current --namespace=netpol-test
 
 # Deploy a backend service
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-    spec:
-      containers:
-      - name: backend
-        image: nginx
-        ports:
-        - containerPort: 80
-EOF
+kubectl apply -f backend-deployment.yaml
 
 # Create a service for the backend
 kubectl expose deployment backend --port=80
 
 # Deploy a client app
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: client
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: client
-  template:
-    metadata:
-      labels:
-        app: client
-    spec:
-      containers:
-      - name: client
-        image: busybox
-        command: ["/bin/sh", "-c", "while true; do wget -O- --timeout=2 http://backend; sleep 5; done"]
-EOF
+kubectl apply -f client-deployment.yaml
 
 # Deploy another pod with different labels
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: other
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: other
-  template:
-    metadata:
-      labels:
-        app: other
-    spec:
-      containers:
-      - name: other
-        image: busybox
-        command: ["/bin/sh", "-c", "while true; do wget -O- --timeout=2 http://backend; sleep 5; done"]
-EOF
+kubectl apply -f other-deployment.yaml
 
 # Wait for pods to be ready
 kubectl wait --for=condition=ready pod --selector=app=backend --timeout=90s
@@ -166,16 +97,7 @@ A security best practice is to start with a default deny policy and then explici
 
 ```bash
 # Create a Network Policy that denies all ingress traffic
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-ingress
-spec:
-  podSelector: {}  # Matches all pods in the namespace
-  policyTypes:
-  - Ingress
-EOF
+kubectl apply -f default-deny-ingress.yaml
 
 # Verify the Network Policy was created
 kubectl get networkpolicies
@@ -209,26 +131,7 @@ Now let's allow traffic from the client pod to the backend:
 
 ```bash
 # Create a Network Policy that allows traffic from client pods to backend pods
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-client-to-backend
-spec:
-  podSelector:
-    matchLabels:
-      app: backend
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: client
-    ports:
-    - protocol: TCP
-      port: 80
-EOF
+kubectl apply -f allow-client-to-backend.yaml
 
 # Verify the new Network Policy
 kubectl get networkpolicies
@@ -265,26 +168,7 @@ Now, let's allow traffic from the default namespace:
 
 ```bash
 # Create a Network Policy that allows traffic from the default namespace
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-from-default-namespace
-spec:
-  podSelector:
-    matchLabels:
-      app: backend
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: default
-    ports:
-    - protocol: TCP
-      port: 80
-EOF
+kubectl apply -f allow-from-default-namespace.yaml
 
 # Label the default namespace to match our selector
 kubectl label namespace default kubernetes.io/metadata.name=default --overwrite
@@ -315,37 +199,7 @@ So far, we've focused on ingress policies (controlling incoming traffic). Now le
 
 ```bash
 # Create a Network Policy that restricts outgoing traffic
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: restrict-client-egress
-spec:
-  podSelector:
-    matchLabels:
-      app: client
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - podSelector:
-        matchLabels:
-          app: backend
-    ports:
-    - protocol: TCP
-      port: 80
-  # Allow DNS resolution
-  - to:
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-EOF
+kubectl apply -f restrict-client-egress.yaml
 
 # Verify the egress policy
 kubectl get networkpolicies
@@ -376,336 +230,13 @@ exit
 
 You should observe that the client pod can connect to the backend but cannot reach external sites.
 
-### Task 12: Combining Multiple Policy Rules
-
-Network Policies are additive, meaning if multiple policies select the same pod, all those policies' rules are combined. Let's see this in action:
-
-```bash
-# Create another policy for the client pod
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: additional-client-policy
-spec:
-  podSelector:
-    matchLabels:
-      app: client
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - ipBlock:
-        cidr: 10.0.0.0/8
-    ports:
-    - protocol: TCP
-      port: 443
-EOF
-
-# List all network policies
-kubectl get networkpolicies
-```
-
-Now the client pod has two egress policies that apply to it: one allowing traffic to backend pods and DNS, and another allowing traffic to IPs in the 10.0.0.0/8 range on port 443.
-
-### Task 13: Implementing a Practical Network Policy Set
-
-Let's create a more comprehensive set of network policies for a typical three-tier application:
-
-```bash
-# First, remove existing policies
-kubectl delete networkpolicy --all
-
-# Create a web tier
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: web
-      tier: frontend
-  template:
-    metadata:
-      labels:
-        app: web
-        tier: frontend
-    spec:
-      containers:
-      - name: web
-        image: nginx
-        ports:
-        - containerPort: 80
-EOF
-
-# Create an API tier
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: api
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: api
-      tier: backend
-  template:
-    metadata:
-      labels:
-        app: api
-        tier: backend
-    spec:
-      containers:
-      - name: api
-        image: nginx
-        ports:
-        - containerPort: 80
-EOF
-
-# Create a database tier
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: db
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: db
-      tier: database
-  template:
-    metadata:
-      labels:
-        app: db
-        tier: database
-    spec:
-      containers:
-      - name: db
-        image: mysql:5.7
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: password
-        ports:
-        - containerPort: 3306
-EOF
-
-# Create services for each tier
-kubectl expose deployment web --port=80
-kubectl expose deployment api --port=80
-kubectl expose deployment db --port=3306
-
-# Allow ingress to web tier from anywhere
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: web-allow-external
-spec:
-  podSelector:
-    matchLabels:
-      app: web
-      tier: frontend
-  policyTypes:
-  - Ingress
-  ingress:
-  - {}  # Empty rule allows all ingress traffic
-EOF
-
-# Restrict API tier to only allow traffic from web tier
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: api-allow-web
-spec:
-  podSelector:
-    matchLabels:
-      app: api
-      tier: backend
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: web
-          tier: frontend
-    ports:
-    - protocol: TCP
-      port: 80
-EOF
-
-# Restrict database tier to only allow traffic from API tier
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: db-allow-api
-spec:
-  podSelector:
-    matchLabels:
-      app: db
-      tier: database
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - podSelector:
-        matchLabels:
-          app: api
-          tier: backend
-    ports:
-    - protocol: TCP
-      port: 3306
-EOF
-
-# Create a default deny policy for anything not explicitly allowed
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
-spec:
-  podSelector: {}
-  policyTypes:
-  - Ingress
-  - Egress
-EOF
-
-# Allow DNS egress for all pods
-cat <<EOF | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-spec:
-  podSelector: {}
-  policyTypes:
-  - Egress
-  egress:
-  - to:
-    - namespaceSelector: {}
-      podSelector:
-        matchLabels:
-          k8s-app: kube-dns
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-EOF
-
-# List all network policies
-kubectl get networkpolicies
-```
-
-### Task 14: Testing the Three-Tier Network Policies
-
-Let's verify our network policies are working as expected:
-
-```bash
-# Create a test pod
-kubectl run test-pod --image=busybox --rm -it -- sh
-```
-
-Inside the test pod, run the following commands:
-
-```bash
-# Test connectivity to web tier (should succeed)
-wget -O- --timeout=2 http://web
-
-# Test connectivity to API tier (should fail)
-wget -O- --timeout=2 http://api
-
-# Test connectivity to database tier (should fail)
-wget -O- --timeout=2 http://db:3306
-
-# Exit the pod
-exit
-```
-
-Next, let's create a pod with web tier labels and test from there:
-
-```bash
-# Create a test pod with web tier labels
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: web-test-pod
-  labels:
-    app: web
-    tier: frontend
-spec:
-  containers:
-  - name: busybox
-    image: busybox
-    command: ["sleep", "3600"]
-EOF
-
-# Wait for the pod to be ready
-kubectl wait --for=condition=ready pod/web-test-pod --timeout=60s
-
-# Exec into the web tier test pod
-kubectl exec -it web-test-pod -- sh
-
-# Test connectivity to API tier (should succeed)
-wget -O- --timeout=2 http://api
-
-# Test connectivity to database tier (should fail)
-wget -O- --timeout=2 http://db:3306
-
-# Exit the pod
-exit
-```
-
-Finally, let's create a pod with API tier labels and test from there:
-
-```bash
-# Create a test pod with API tier labels
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: api-test-pod
-  labels:
-    app: api
-    tier: backend
-spec:
-  containers:
-  - name: busybox
-    image: busybox
-    command: ["sleep", "3600"]
-EOF
-
-# Wait for the pod to be ready
-kubectl wait --for=condition=ready pod/api-test-pod --timeout=60s
-
-# Exec into the API tier test pod
-kubectl exec -it api-test-pod -- sh
-
-# Test connectivity to database tier (should succeed)
-wget -O- --timeout=2 http://db:3306
-
-# Test connectivity to web tier (should fail)
-wget -O- --timeout=2 http://web
-
-# Exit the pod
-exit
-```
-
-### Task 15: Cleanup
+### Task 12: Cleanup
 
 Before moving on to the next lab, let's clean up the resources we created:
 
 ```bash
 # Delete test pods
-kubectl delete pod web-test-pod api-test-pod
+kubectl delete pod --all -n netpol-test
 
 # Return to default namespace
 kubectl config set-context --current --namespace=default
@@ -725,8 +256,6 @@ Let's confirm you've mastered the key concepts from this lab:
 - You can create and apply basic ingress and egress policies
 - You know how to use label selectors to target specific pods
 - You can implement namespace-based policies
-- You understand how multiple policies combine
-- You can implement a comprehensive network security strategy for a multi-tier application
 
 ## Summary
 

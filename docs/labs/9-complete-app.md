@@ -760,24 +760,29 @@ This exercise demonstrates how the various Kubernetes components work together t
 
 Now that you've completed the Kubernetes Fundamentals Workshop, consider these next steps for continuing your Kubernetes journey:
 
-1. **Explore Advanced Topics**:
+**1. Explore Advanced Topics**:
+
    - Kubernetes Operators and Custom Resources
    - GitOps and CI/CD for Kubernetes
    - Service Mesh technologies (like Istio or Linkerd)
    - Advanced observability and monitoring
 
-2. **Certifications**:
+**2. Certifications**:
+
    - Certified Kubernetes Administrator (CKA)
    - Certified Kubernetes Application Developer (CKAD)
    - Certified Kubernetes Security Specialist (CKS)
 
-3. **Practice and Build**:
+**3. Practice and Build**:
+
    - Deploy your own applications on Kubernetes
    - Contribute to open-source Kubernetes projects
    - Set up a personal Kubernetes lab environment
 
 ## Your Feedback Matters!
 
-Please take a moment to complete our workshop feedback form. Your insights are invaluable in helping us improve future workshops and develop content that best serves your learning needs.
+Please take a moment to complete our [workshop feedback form](https://forms.gle/HxoVhSZRNk49BweS9){target="_blank"}.
+
+Your insights are invaluable in helping us improve future workshops and develop content that best serves your learning needs.
 
 Finally, thank you for participating in this workshop!

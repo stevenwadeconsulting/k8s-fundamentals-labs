@@ -45,6 +45,7 @@ Each participant will have access to a pre-configured two-node Kubernetes cluste
    ```bash
    git clone https://github.com/stevenwadeconsulting/k8s-fundamentals-labs.git
    cd k8s-fundamentals-labs
+   cd examples
    ```
 
 ## Workshop Labs

@@ -21,18 +21,7 @@ By the end of this lab, you will be able to:
 
 - Completion of Lab 3: DaemonSets
 - Understanding of Pods and Deployments
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../004-services` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -53,36 +42,7 @@ First, let's create a backend deployment that we'll expose with various Service 
 
 ```bash
 # Create a backend deployment
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-    spec:
-      containers:
-      - name: backend
-        image: hashicorp/http-echo:latest
-        args:
-        - "-text=Hello from the backend service"
-        ports:
-        - containerPort: 5678
-        resources:
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-          requests:
-            memory: "32Mi"
-            cpu: "50m"
-EOF
+kubectl apply -f backend-deployment.yaml
 
 # Verify the deployment is running
 kubectl get deployment backend
@@ -95,18 +55,7 @@ The ClusterIP Service type is the default and provides internal access to your a
 
 ```bash
 # Create a ClusterIP service for the backend
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-service
-spec:
-  selector:
-    app: backend
-  ports:
-  - port: 80
-    targetPort: 5678
-EOF
+kubectl apply -f backend-service.yaml
 
 # Examine the service
 kubectl get service backend-service
@@ -146,20 +95,7 @@ NodePort services expose your application on a static port on each node in the c
 
 ```bash
 # Create a NodePort service
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-nodeport
-spec:
-  selector:
-    app: backend
-  ports:
-  - port: 80
-    targetPort: 5678
-    nodePort: 30080
-  type: NodePort
-EOF
+kubectl apply -f backend-nodeport-service.yaml
 
 # Examine the service
 kubectl get service backend-nodeport
@@ -194,54 +130,10 @@ In microservice architectures, services often need to communicate with each othe
 
 ```bash
 # Create a frontend deployment that will communicate with the backend
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: frontend
-  template:
-    metadata:
-      labels:
-        app: frontend
-    spec:
-      containers:
-      - name: frontend
-        image: hashicorp/http-echo:latest
-        args:
-        - "-text=Frontend service connecting to backend at: \${BACKEND_URL}"
-        ports:
-        - containerPort: 5678
-        env:
-        - name: BACKEND_URL
-          value: "http://backend-service"
-        resources:
-          limits:
-            memory: "64Mi"
-            cpu: "100m"
-          requests:
-            memory: "32Mi"
-            cpu: "50m"
-EOF
+kubectl apply -f frontend-deployment.yaml
 
 # Create a service for the frontend
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend-service
-spec:
-  selector:
-    app: frontend
-  ports:
-  - port: 80
-    targetPort: 5678
-  type: ClusterIP
-EOF
+kubectl apply -f frontend-services.yaml
 
 # Verify both services
 kubectl get services
@@ -314,47 +206,10 @@ Services use label selectors to determine which pods to send traffic to. Let's e
 
 ```bash
 # Create a deployment with multiple labels
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: multi-label-app
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: multi-label
-      tier: backend
-  template:
-    metadata:
-      labels:
-        app: multi-label
-        tier: backend
-        version: v1
-    spec:
-      containers:
-      - name: http-echo
-        image: hashicorp/http-echo:latest
-        args:
-        - "-text=Multi-label app v1"
-        ports:
-        - containerPort: 5678
-EOF
+kubectl apply -f multi-label-deployment.yaml
 
 # Create a service that selects on multiple labels
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: multi-label-service
-spec:
-  selector:
-    app: multi-label
-    tier: backend
-  ports:
-  - port: 80
-    targetPort: 5678
-EOF
+kubectl apply -f multi-label-service.yaml
 
 # Test the service
 kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- multi-label-service
@@ -364,49 +219,10 @@ Now, let's deploy a v2 version and see how we can target specific versions:
 
 ```bash
 # Create a v2 deployment
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: multi-label-app-v2
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: multi-label
-      tier: backend
-      version: v2
-  template:
-    metadata:
-      labels:
-        app: multi-label
-        tier: backend
-        version: v2
-    spec:
-      containers:
-      - name: http-echo
-        image: hashicorp/http-echo:latest
-        args:
-        - "-text=Multi-label app v2"
-        ports:
-        - containerPort: 5678
-EOF
+kubectl apply -f multi-label-deployment-v2.yaml
 
 # Create a service that targets only v2
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: multi-label-service-v2
-spec:
-  selector:
-    app: multi-label
-    tier: backend
-    version: v2
-  ports:
-  - port: 80
-    targetPort: 5678
-EOF
+kubectl apply -f multi-label-service-v2.yaml
 
 # Test both services
 kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- multi-label-service
@@ -421,19 +237,7 @@ Sometimes you need direct access to specific pods rather than load-balanced acce
 
 ```bash
 # Create a headless service (with clusterIP: None)
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend-headless
-spec:
-  selector:
-    app: backend
-  ports:
-  - port: 80
-    targetPort: 5678
-  clusterIP: None
-EOF
+kubectl apply -f backend-headless-service.yaml
 
 # Examine the service
 kubectl get service backend-headless

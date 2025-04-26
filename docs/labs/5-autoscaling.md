@@ -20,18 +20,7 @@ By the end of this lab, you will be able to:
 
 - Completion of Lab 4: Services and Networking
 - Understanding of Deployments and resource management concepts
-
-## Lab Environment Validation
-
-Ensure you're in your assigned namespace:
-
-```bash
-# Verify your current namespace
-kubectl config view --minify | grep namespace:
-
-# If needed, set your namespace
-kubectl config set-context --current --namespace=workshop-$USER
-```
+- Execute `cd ../005-autoscaling` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -46,34 +35,7 @@ Let's create a deployment with specific resource requests and limits:
 
 ```bash
 # Create a deployment with resource requests and limits
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: resource-demo
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: resource-demo
-  template:
-    metadata:
-      labels:
-        app: resource-demo
-    spec:
-      containers:
-      - name: resource-demo
-        image: nginx
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
-        ports:
-        - containerPort: 80
-EOF
+kubectl apply -f resource-deployment.yaml
 
 # Check the deployment
 kubectl get deployment resource-demo
@@ -94,32 +56,7 @@ Let's create an application that we can use to test autoscaling. We'll use the `
 
 ```bash
 # Create a deployment with defined CPU resource requests
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: php-apache
-spec:
-  selector:
-    matchLabels:
-      run: php-apache
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        run: php-apache
-    spec:
-      containers:
-      - name: php-apache
-        image: registry.k8s.io/hpa-example
-        ports:
-        - containerPort: 80
-        resources:
-          limits:
-            cpu: 500m
-          requests:
-            cpu: 200m
-EOF
+kubectl apply -f resource-deployment.yaml
 
 # Create a service for the deployment
 kubectl expose deployment php-apache --port=80
@@ -133,7 +70,7 @@ The container image (`registry.k8s.io/hpa-example`) runs a simple PHP applicatio
 
 ### Task 3: Creating a Horizontal Pod Autoscaler
 
-Now let's create an HPA that will automatically scale our deployment based on CPU utilization:
+Now let's create an HPA that will automatically scale our deployment based on CPU utilisation:
 
 ```bash
 # Create an HPA targeting 50% CPU utilization
@@ -200,7 +137,7 @@ Look at the "Events" section, which shows the scaling decisions that the HPA has
 The HPA controller follows these general rules:
 1. It checks metrics at a regular interval (default: 15 seconds)
 2. It calculates the desired number of replicas based on current/target metric values
-3. It applies a stabilization window to prevent "thrashing" (rapid scaling up and down)
+3. It applies a stabilisation window to prevent "thrashing" (rapid scaling up and down)
 4. It respects minimum and maximum replica constraints
 
 ### Task 6: Creating an Advanced HPA (v2)
@@ -212,43 +149,7 @@ Let's create a more advanced HPA configuration using the `autoscaling/v2` API ve
 kubectl delete hpa php-apache
 
 # Create an advanced HPA with scale-down stabilization
-cat <<EOF | kubectl apply -f -
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: php-apache-v2
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: php-apache
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-      - type: Percent
-        value: 10
-        periodSeconds: 60
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-      - type: Percent
-        value: 100
-        periodSeconds: 15
-      - type: Pods
-        value: 4
-        periodSeconds: 15
-      selectPolicy: Max
-EOF
+kubectl apply -f php-apache-hpa-v2.yaml
 
 # Check the new HPA
 kubectl get hpa
@@ -276,133 +177,7 @@ kubectl get hpa php-apache-v2 --watch
 kubectl get pods -l run=php-apache
 ```
 
-After a few minutes, stop the load generator (Ctrl+C) and observe the scale-down behavior, which should be more gradual than before.
-
-### Task 7: HPA with Multiple Metrics
-
-In production environments, you might want to scale based on multiple metrics. Let's create an HPA that scales based on both CPU and memory:
-
-```bash
-# First create a deployment that defines both CPU and memory requests
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: multi-metric-app
-spec:
-  selector:
-    matchLabels:
-      app: multi-metric
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: multi-metric
-    spec:
-      containers:
-      - name: multi-metric
-        image: registry.k8s.io/hpa-example
-        ports:
-        - containerPort: 80
-        resources:
-          requests:
-            cpu: 200m
-            memory: 64Mi
-          limits:
-            cpu: 500m
-            memory: 128Mi
-EOF
-
-# Create a service
-kubectl expose deployment multi-metric-app --port=80
-
-# Create an HPA with multiple metrics
-cat <<EOF | kubectl apply -f -
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: multi-metric-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: multi-metric-app
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
-  - type: Resource
-    resource:
-      name: memory
-      target:
-        type: Utilization
-        averageUtilization: 50
-EOF
-
-# Check the HPA
-kubectl get hpa multi-metric-hpa
-kubectl describe hpa multi-metric-hpa
-```
-
-With this configuration, the HPA will scale based on whichever metric requires more replicas.
-
-### Task 8: Autoscaling Best Practices
-
-Here are some best practices to keep in mind when implementing HPAs in production:
-
-1. **Set appropriate resource requests**: The accuracy of autoscaling depends on properly configured resource requests
-2. **Define reasonable min and max replicas**: Don't set max too high to prevent runaway scaling
-3. **Choose appropriate metrics**: CPU is a good starting point, but consider application-specific metrics for more accurate scaling
-4. **Configure scaling behaviour**: Tune stabilisation windows and scaling policies based on your application's needs
-5. **Combine with cluster autoscaling**: For workloads with high variability, combine HPAs with cluster autoscaling
-6. **Test thoroughly**: Validate scaling behaviour under various load patterns
-
-Let's document these best practices by creating a ConfigMap:
-
-```bash
-# Create a ConfigMap with best practices
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: autoscaling-best-practices
-data:
-  best-practices.txt: |
-    Horizontal Pod Autoscaler Best Practices:
-
-    1. Resource Requests:
-       - Set accurate resource requests that reflect your application's actual needs
-       - Monitor actual usage to refine resource requests over time
-
-    2. Scaling Boundaries:
-       - Set appropriate minimum replicas to handle baseline load
-       - Set maximum replicas to prevent excessive resource consumption
-       - Consider cost implications of maximum scale
-
-    3. Metrics Selection:
-       - CPU is a good general-purpose metric
-       - Memory-based scaling should be used cautiously as memory often doesn't decrease
-       - Consider custom metrics that directly relate to user experience
-
-    4. Scaling Behavior:
-       - Configure longer stabilization windows for scale-down to prevent thrashing
-       - Configure faster scale-up for responsiveness
-       - Balance responsiveness with stability
-
-    5. Testing:
-       - Test with realistic load patterns
-       - Validate both scale-up and scale-down behavior
-       - Ensure application gracefully handles scaling events
-EOF
-
-# Retrieve the best practices document
-kubectl get configmap autoscaling-best-practices -o jsonpath='{.data.best-practices\.txt}' | more
-```
+After a few minutes, stop the load generator (Ctrl+C) and observe the scale-down behaviour, which should be more gradual than before.
 
 ### Task 9: Cleanup
 
@@ -410,16 +185,13 @@ Before moving on to the next lab, let's clean up the resources we created:
 
 ```bash
 # Delete HPAs
-kubectl delete hpa php-apache-v2 multi-metric-hpa
+kubectl delete hpa php-apache-v2
 
 # Delete deployments
-kubectl delete deployment resource-demo php-apache multi-metric-app
+kubectl delete deployment resource-demo php-apache
 
 # Delete services
-kubectl delete service php-apache multi-metric-app
-
-# Delete ConfigMap
-kubectl delete configmap autoscaling-best-practices
+kubectl delete service php-apache
 
 # Verify cleanup
 kubectl get hpa
@@ -444,8 +216,6 @@ Congratulations! You have completed Lab 5 of the Kubernetes Fundamentals Worksho
 1. How to configure resource requests and limits for containers
 2. How to create basic and advanced Horizontal Pod Autoscalers
 3. How to test autoscaling behaviour under load
-4. How to configure custom scaling behaviours
-5. Best practices for implementing autoscaling in production
 
 Horizontal Pod Autoscaling is a powerful feature that allows your applications to respond automatically to changing workloads, ensuring both performance and efficient resource utilisation.
 
