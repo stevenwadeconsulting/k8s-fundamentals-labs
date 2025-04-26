@@ -12,6 +12,3 @@ docs-build:
 docs-serve:
 	docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
 	echo "Open http://localhost:8000 in your browser to view the documentation."
-
-docs-seed:
-	cp README.md docs/index.md

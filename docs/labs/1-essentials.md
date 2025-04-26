@@ -52,6 +52,7 @@ kubectl describe node $NODE_NAME
 ```
 
 Take a moment to review the output. Note the:
+
 - CPU and memory resources
 - Node conditions
 - System info
@@ -68,6 +69,7 @@ kubectl get pods -n kube-system -o wide
 ```
 
 These pods run components like:
+
 - CoreDNS (cluster DNS)
 - kube-proxy (network routing)
 - Cloud-specific components

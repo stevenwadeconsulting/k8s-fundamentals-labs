@@ -3,32 +3,7 @@ site_url: https://stevenwadeconsulting.github.io/k8s-fundamentals-labs
 repo_name: stevenwadeconsulting/k8s-fundamentals-labs
 repo_url: https://github.com/stevenwadeconsulting/k8s-fundamentals-labs
 edit_uri: ""
-
 site_dir: public
-
-# Configuration
-theme:
-  name: material
-  language: en
-  palette:
-    primary: blue
-    accent: indigo
-  features:
-    - navigation.sections
-
-# Plugins
-plugins:
-  - search
-
-# Extensions
-markdown_extensions:
-  - admonition
-  - pymdownx.highlight
-  - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
-  - toc:
-      permalink: true
 
 # Page tree
 nav:
@@ -43,3 +18,67 @@ nav:
       - 7. Network Policies: labs/7-network-policies.md
       - 8. RBAC: labs/8-rbac.md
       - 9. Complete App: labs/9-complete-app.md
+
+# Configuration
+theme:
+  feaures:
+    - tabs
+  name: material
+  icon:
+    logo: material/cloud
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  static_templates:
+    - 404.html
+
+# Plugins
+plugins:
+  - search
+
+# Extensions
+markdown_extensions:
+  - markdown.extensions.admonition
+  - markdown.extensions.attr_list
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+        # - pymdownx.highlight:
+      #     linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets:
+      check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/swade1987
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/stevendavidwade/
+
+copyright: Copyright &copy; 2025 Steven Wade Consulting
