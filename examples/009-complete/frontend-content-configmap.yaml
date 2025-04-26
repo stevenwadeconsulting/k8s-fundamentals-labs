@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-content
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Kubernetes Workshop Complete App</title>
+        <style>
+            body {
+                background-color: #3498db;
+                color: white;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding-top: 100px;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: rgba(0,0,0,0.3);
+                border-radius: 10px;
+            }
+            button {
+                background-color: #2ecc71;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+            #result {
+                margin-top: 20px;
+                padding: 10px;
+                background-color: rgba(0,0,0,0.2);
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="container">
+        <h1>Kubernetes Workshop Complete App</h1>
+        <p>This application demonstrates concepts from this workshop:</p>
+        <ul style="text-align: left; display: inline-block;">
+            <li>Multi-tier architecture with frontend, backend, and database</li>
+            <li>ConfigMaps and Secrets for configuration</li>
+            <li>Persistent storage with PVCs</li>
+            <li>Service networking between components</li>
+            <li>RBAC with ServiceAccounts</li>
+            <li>Horizontal Pod Autoscaling</li>
+        </ul>
+        <button onclick="callApi()">Call Backend API</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        function callApi() {
+            document.getElementById('result').innerHTML = 'Loading...';
+            fetch('/api')
+                .then(response => response.json())  // Parse as JSON instead of text
+                .then(data => {
+                    document.getElementById('result').innerHTML = data.result;  // Extract the result field
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 'Error: ' + error;
+                });
+       }
+    </script>
+    </body>
+    </html>

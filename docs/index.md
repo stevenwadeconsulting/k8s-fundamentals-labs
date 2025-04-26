@@ -52,54 +52,54 @@ Each participant will have access to a pre-configured two-node Kubernetes cluste
 
 The workshop consists of eight hands-on labs, each focusing on different aspects of Kubernetes:
 
-1. **[Initial Kubernetes Exploration](docs/labs/1-essentials.md)**
+1. **[Initial Kubernetes Exploration](labs/1-essentials.md)**
     - Connecting to your cluster
     - Essential kubectl commands
     - Understanding namespaces
     - Working with your first Pod
 
-2. **[Deployments and Rolling Updates](docs/labs/2-deployments.md)**
+2. **[Deployments and Rolling Updates](labs/2-deployments.md)**
     - Creating basic Deployments
     - Performing rolling updates
     - Working with ConfigMaps and Secrets
     - Scaling and rollback procedures
 
-3. **[DaemonSets](docs/labs/3-daemonsets.md)**
+3. **[DaemonSets](labs/3-daemonsets.md)**
     - DaemonSet use cases
     - Creating and managing DaemonSets
     - Understanding DaemonSet scheduling
 
-4. **[Services and Networking](docs/labs/4-services.md)**
+4. **[Services and Networking](labs/4-services.md)**
     - Service types and usages
     - Service-to-service communication
     - DNS-based service discovery
     - Exposing applications to external traffic
 
-5. **[Horizontal Pod Autoscaling](docs/labs/5-autoscaling.md)**
+5. **[Horizontal Pod Autoscaling](labs/5-autoscaling.md)**
     - Resource requests and limits
     - Creating Horizontal Pod Autoscalers
-    - Testing scaling behaviour
+    - Testing scaling behavior
     - Advanced configuration options
 
-6. **[Persistent Storage](docs/labs/6-storage.md)**
+6. **[Persistent Storage](labs/6-storage.md)**
     - Storage Classes
     - Persistent Volumes and Claims
     - Stateful applications with persistent storage
     - Volume resize operations
 
-7. **[Network Policies](docs/labs/7-networkpolicies.md)**
+7. **[Network Policies](labs/7-networkpolicies.md)**
     - Securing pod-to-pod communication
     - Implementing default deny policies
     - Allowing specific traffic patterns
     - Testing and validating policies
 
-8. **[RBAC and Security](docs/labs/8-rbac.md)**
+8. **[RBAC and Security](labs/8-rbac.md)**
     - Service Accounts and permissions
     - Creating Roles and RoleBindings
     - Testing RBAC enforcement
     - Security best practices
 
-9. **[Comprehensive Final Exercise](docs/labs/9-complete-app.md)**
+9. **[Comprehensive Final Exercise](labs/9-complete-app.md)**
     - Deploying a complete three-tier application
     - Combining all workshop concepts
     - Real-world deployment patterns
@@ -117,9 +117,9 @@ Each lab includes four key sections:
 
 ## Additional Resources
 
-- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/)
-- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/)
+- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/){target="_blank"}
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/){target="_blank"}
+- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/){target="_blank"}
 
 ## Troubleshooting
 
@@ -141,11 +141,9 @@ If you encounter any issues during the labs:
 
 ## Feedback
 
-Your feedback is valuable! At the end of the workshop, please share your thoughts on:
-- Lab content and difficulty level
-- Workshop pace and structure
-- Areas for improvement
-- Additional topics you'd like to see covered
+Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our [feedback form](https://forms.gle/HxoVhSZRNk49BweS9){target="_blank"}.
+
+Your input helps us improve future workshops and develop new content based on your needs and interests.
 
 ## License
 
