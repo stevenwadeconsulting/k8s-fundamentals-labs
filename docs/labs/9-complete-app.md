@@ -382,10 +382,6 @@ kubectl exec -it $FRONTEND_POD -- curl backend-service
 # Get a backend pod
 BACKEND_POD=$(kubectl get pod -l app=backend -o jsonpath='{.items[0].metadata.name}')
 
-# Check environment variables
-kubectl exec -it $BACKEND_POD -- env | grep DB_HOST
-kubectl exec -it $BACKEND_POD -- env | grep API_KEY
-
 # Verify MySQL is running
 kubectl get pods -l app=mysql
 MYSQL_POD=$(kubectl get pod -l app=mysql -o jsonpath='{.items[0].metadata.name}')

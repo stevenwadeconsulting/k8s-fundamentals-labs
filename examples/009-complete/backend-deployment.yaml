@@ -22,11 +22,11 @@ spec:
             - containerPort: 5678
           resources:
             limits:
-              memory: "256Mi"
-              cpu: "300m"
+              memory: "64Mi"
+              cpu: "50m"
             requests:
-              memory: "128Mi"
-              cpu: "150m"
+              memory: "32Mi"
+              cpu: "20m"
           readinessProbe:
             httpGet:
               path: /
