@@ -91,40 +91,46 @@ kubectl get pods -l app=backend -o wide
 
 The endpoints match the IPs of the pods that match the service's selector.
 
-### Task 4: Creating a NodePort Service
+### Task 4: Creating a LoadBalancer Service
 
-NodePort services expose your application on a static port on each node in the cluster:
+LoadBalancer services expose your application externally using your cloud provider's load balancer. Since we're using Digital Ocean, which supports LoadBalancer services, let's create one:
 
 ```bash
-# Create a NodePort service
-kubectl apply -f backend-nodeport-service.yaml
+# Create a LoadBalancer service
+kubectl apply -f backend-loadbalancer-service.yaml
 
 # Examine the service
-kubectl get service backend-nodeport
-kubectl describe service backend-nodeport
+kubectl get service backend-loadbalancer
+kubectl describe service backend-loadbalancer
 ```
 
 Note these key details:
 
-- **Type:** NodePort
-- **NodePort:** The port exposed on each node (30080)
-- **Port:** The internal cluster port (80)
+- **Type:** LoadBalancer
+- **External IP:** The IP address assigned by Digital Ocean
+- **Port:** The port your service is exposed on (80)
 - **TargetPort:** The container port (5678)
 
-To access this service from outside the cluster, you need:
-
-1. The IP address of any node in the cluster
-2. The NodePort (30080)
+After applying this service, Digital Ocean will provision a load balancer and assign it an external IP address. It may take a minute or two for the external IP to be assigned:
 
 ```bash
-# Get the internal IP addresses of your nodes
-kubectl get nodes -o wide
+# Check the service until an external IP is assigned
+kubectl get service backend-loadbalancer --watch
 ```
 
-In a real environment, you would access the service using:
+Press Ctrl+C to exit the watch mode once the external IP appears.
+
+You can access your service using:
 ```
-http://<external-ip>:30080
+http://<external-ip>
 ```
+
+The LoadBalancer service type provides an easier and more robust way to expose your applications to the internet compared to NodePort, as it:
+
+- Creates an actual load balancer in your cloud provider
+- Provides a stable external IP
+- Handles traffic distribution automatically
+- Doesn't require knowing node IPs or specific ports
 
 ### Task 5: DNS-Based Service Discovery
 
