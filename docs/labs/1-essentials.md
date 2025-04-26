@@ -207,8 +207,6 @@ kubectl get pods
 ```
 
 ## Lab Validation
-
-## Lab Validation
 Let's confirm you've mastered the key concepts from this lab:
 
 - You can successfully connect to and explore the Kubernetes cluster

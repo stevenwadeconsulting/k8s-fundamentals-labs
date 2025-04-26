@@ -117,9 +117,9 @@ Each lab includes four key sections:
 
 ## Additional Resources
 
-- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/){target="_blank"}
-- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/){target="_blank"}
-- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/){target="_blank"}
+- [Kubernetes Official Documentation](https://kubernetes.io/docs/home/)
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+- [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/)
 
 ## Troubleshooting
 

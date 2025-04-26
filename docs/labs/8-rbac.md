@@ -310,7 +310,7 @@ kubectl apply -f pod-reader-rbac.yaml
 kubectl exec -it troubleshoot-pod -- kubectl get pods
 ```
 
-### Task 14: Cleanup
+### Task 13: Cleanup
 
 Before moving on, let's clean up the resources we created:
 
