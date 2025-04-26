@@ -1,0 +1,632 @@
+# Lab 6: Persistent Storage
+
+## Introduction
+
+In this lab, you'll learn how to use persistent storage in Kubernetes. By default, storage in Kubernetes pods is ephemeral—when a pod is restarted or rescheduled, any data written to the container's filesystem is lost. For applications that need to persist data (databases, file servers, etc.), Kubernetes provides persistent storage solutions.
+
+You'll explore Storage Classes, Persistent Volumes (PVs), and Persistent Volume Claims (PVCs), which together form Kubernetes' storage abstraction system. This abstraction allows applications to request and use storage resources without needing to know the specific details of the underlying storage infrastructure.
+
+## Objectives
+
+By the end of this lab, you will be able to:
+
+- Understand the Kubernetes storage architecture
+- Explore and use Storage Classes
+- Create and manage Persistent Volume Claims
+- Use persistent storage with pods and deployments
+- Resize volumes when needed
+- Implement stateful applications with persistent storage
+
+## Prerequisites
+
+- Completion of Lab 5: Horizontal Pod Autoscaling
+- Basic understanding of storage concepts
+
+## Lab Environment Validation
+
+Ensure you're in your assigned namespace:
+
+```bash
+# Verify your current namespace
+kubectl config view --minify | grep namespace:
+
+# If needed, set your namespace
+kubectl config set-context --current --namespace=workshop-$USER
+```
+
+## Lab Tasks
+
+### Task 1: Understanding the Kubernetes Storage Architecture
+
+Before we start creating resources, let's understand the key components of Kubernetes storage:
+
+1. **Storage Classes**: Define the types of storage available in the cluster
+2. **Persistent Volumes (PVs)**: Represent physical storage resources provisioned in the cluster
+3. **Persistent Volume Claims (PVCs)**: Requests for storage resources by applications
+4. **Volume Mounts**: How containers access the persistent storage
+
+Let's explore the storage classes available in your cluster:
+
+```bash
+# List available storage classes
+kubectl get storageclass
+
+# Get details about the default storage class
+kubectl describe storageclass do-block-storage
+```
+
+In this lab environment, you have several Digital Ocean storage classes available:
+- `do-block-storage` (default): Uses ext4 filesystem with Delete reclaim policy
+- `do-block-storage-retain`: Uses ext4 filesystem with Retain reclaim policy
+- `do-block-storage-xfs`: Uses XFS filesystem with Delete reclaim policy
+- `do-block-storage-xfs-retain`: Uses XFS filesystem with Retain reclaim policy
+
+Note these key attributes for each storage class:
+- **Provisioner**: The plugin that creates the actual storage
+- **ReclaimPolicy**: What happens to the storage when a PVC is deleted (Delete or Retain)
+- **VolumeBindingMode**: When the actual storage is provisioned
+- **AllowVolumeExpansion**: Whether volumes can be expanded after creation
+
+### Task 2: Creating Your First Persistent Volume Claim
+
+Let's create a simple PVC using the default storage class:
+
+```bash
+# Create a basic PVC
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-first-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+# Check the status of your PVC
+kubectl get pvc
+```
+
+Notice the PVC's status should be "Bound," indicating that a Persistent Volume (PV) has been automatically provisioned for your claim. Let's examine this PV:
+
+```bash
+# List all PVs
+kubectl get pv
+
+# Get details about the PV that was created
+PV_NAME=$(kubectl get pvc my-first-pvc -o jsonpath='{.spec.volumeName}')
+kubectl describe pv $PV_NAME
+```
+
+Key points to note:
+- The PV was dynamically provisioned by the storage class
+- It has the same size as requested in the PVC
+- The access mode is ReadWriteOnce (RWO), meaning it can be mounted as read-write by a single node
+- It's bound to your specific PVC
+
+### Task 3: Using a PVC with a Pod
+
+Now let's create a pod that uses our PVC:
+
+```bash
+# Create a pod that mounts the PVC
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-demo-pod
+spec:
+  containers:
+  - name: task-pv-container
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: task-pv-storage
+  volumes:
+  - name: task-pv-storage
+    persistentVolumeClaim:
+      claimName: my-first-pvc
+EOF
+
+# Verify the pod is running
+kubectl get pod pvc-demo-pod
+```
+
+Now let's write some data to the persistent volume:
+
+```bash
+# Write a file to the persistent volume
+kubectl exec -it pvc-demo-pod -- bash -c "echo 'Hello from Kubernetes storage' > /usr/share/nginx/html/index.html"
+
+# Verify the file was created
+kubectl exec -it pvc-demo-pod -- cat /usr/share/nginx/html/index.html
+```
+
+### Task 4: Testing Persistence Across Pod Restarts
+
+Let's delete the pod and create a new one to verify that our data persists:
+
+```bash
+# Delete the pod
+kubectl delete pod pvc-demo-pod
+
+# Create a new pod that uses the same PVC
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-demo-pod-2
+spec:
+  containers:
+  - name: task-pv-container
+    image: nginx
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - mountPath: "/usr/share/nginx/html"
+      name: task-pv-storage
+  volumes:
+  - name: task-pv-storage
+    persistentVolumeClaim:
+      claimName: my-first-pvc
+EOF
+
+# Wait for the pod to be ready
+kubectl wait --for=condition=Ready pod/pvc-demo-pod-2 --timeout=60s
+
+# Check if our data is still there
+kubectl exec -it pvc-demo-pod-2 -- cat /usr/share/nginx/html/index.html
+```
+
+You should see "Hello from Kubernetes storage" in the output, confirming that our data persisted even when the pod was deleted and recreated.
+
+### Task 5: Using Different Storage Classes
+
+Now, let's explore using different storage classes for specific needs:
+
+```bash
+# Create a PVC with XFS file system
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: xfs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage-xfs
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+# Create a PVC with Retain policy
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retain-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage-retain
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+# Check all PVCs
+kubectl get pvc
+```
+
+Let's create a pod to verify the file system type:
+
+```bash
+# Create a pod to check the XFS file system
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: xfs-demo-pod
+spec:
+  containers:
+  - name: fs-check-container
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - mountPath: "/data"
+      name: xfs-volume
+  volumes:
+  - name: xfs-volume
+    persistentVolumeClaim:
+      claimName: xfs-pvc
+EOF
+
+# Wait for the pod to be ready
+kubectl wait --for=condition=Ready pod/xfs-demo-pod --timeout=60s
+
+# Check the file system type
+kubectl exec -it xfs-demo-pod -- df -T /data
+```
+
+You should see that the file system is XFS, as specified by the storage class.
+
+### Task 6: Volume Expansion
+
+One of the advantages of cloud-based storage is the ability to resize volumes. Let's expand one of our PVCs:
+
+```bash
+# First check if your storage class supports expansion
+kubectl get storageclass do-block-storage -o jsonpath='{.allowVolumeExpansion}'
+
+# Should return "true"
+
+# Resize the PVC
+kubectl patch pvc my-first-pvc -p '{"spec":{"resources":{"requests":{"storage":"2Gi"}}}}'
+
+# Check the status of the PVC
+kubectl get pvc my-first-pvc
+```
+
+The PVC should now show 2Gi for storage. Let's verify the resize in the pod:
+
+```bash
+# Create a new pod to access the resized volume
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resize-check-pod
+spec:
+  containers:
+  - name: volume-check
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - mountPath: "/data"
+      name: resized-volume
+  volumes:
+  - name: resized-volume
+    persistentVolumeClaim:
+      claimName: my-first-pvc
+EOF
+
+# Wait for the pod to be ready
+kubectl wait --for=condition=Ready pod/resize-check-pod --timeout=60s
+
+# Check the volume size
+kubectl exec -it resize-check-pod -- df -h /data
+```
+
+You should see that the volume now has approximately 2GB of space.
+
+### Task 7: Working with StatefulSets
+
+StatefulSets are designed for stateful applications that need stable, persistent storage. Let's deploy a StatefulSet that uses PVCs:
+
+```bash
+# Create a headless service for the StatefulSet
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-headless
+  labels:
+    app: nginx-sts
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx-sts
+EOF
+
+# Create a StatefulSet with persistent storage
+cat <<EOF | kubectl apply -f -
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  serviceName: "nginx-headless"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-sts
+  template:
+    metadata:
+      labels:
+        app: nginx-sts
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: do-block-storage
+      resources:
+        requests:
+          storage: 1Gi
+EOF
+
+# Check the created StatefulSet
+kubectl get statefulset web
+
+# Check the automatically created PVCs
+kubectl get pvc
+```
+
+You should see two new PVCs created automatically, one for each StatefulSet replica, with names like `www-web-0` and `www-web-1`.
+
+Let's write unique data to each StatefulSet pod:
+
+```bash
+# Write data to the first pod
+kubectl exec -it web-0 -- bash -c "echo 'Data from pod 0' > /usr/share/nginx/html/index.html"
+
+# Write data to the second pod
+kubectl exec -it web-1 -- bash -c "echo 'Data from pod 1' > /usr/share/nginx/html/index.html"
+
+# Verify the data
+kubectl exec -it web-0 -- cat /usr/share/nginx/html/index.html
+kubectl exec -it web-1 -- cat /usr/share/nginx/html/index.html
+```
+
+Now, let's delete the pods and verify that the data persists:
+
+```bash
+# Delete the pods
+kubectl delete pod web-0 web-1
+
+# Wait for the pods to be recreated
+kubectl get pods -w
+# Press Ctrl+C when both pods are Running again
+
+# Verify the data still exists
+kubectl exec -it web-0 -- cat /usr/share/nginx/html/index.html
+kubectl exec -it web-1 -- cat /usr/share/nginx/html/index.html
+```
+
+The pods should still contain their unique data, demonstrating how StatefulSets provide stable storage for stateful applications.
+
+### Task 8: Understanding StorageClass Reclaim Policies
+
+Let's explore what happens when you delete a PVC with different reclaim policies:
+
+```bash
+# First, create a pod using the retain-pvc
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: retain-pod
+spec:
+  containers:
+  - name: retain-container
+    image: busybox
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - mountPath: "/data"
+      name: retain-volume
+  volumes:
+  - name: retain-volume
+    persistentVolumeClaim:
+      claimName: retain-pvc
+EOF
+
+# Write some data to the volume
+kubectl exec -it retain-pod -- sh -c "echo 'Important data' > /data/important.txt"
+
+# Delete the pod
+kubectl delete pod retain-pod
+
+# Now delete the PVC
+kubectl delete pvc retain-pvc
+
+# Check the status of PVs
+kubectl get pv
+```
+
+You should notice that the PV associated with the retain-pvc still exists but in the "Released" state. This is because the storage class uses the "Retain" reclaim policy, which preserves the data even after the PVC is deleted.
+
+For comparison, let's also delete a PVC with the "Delete" reclaim policy:
+
+```bash
+# Delete the xfs-pvc (which uses a storage class with Delete policy)
+kubectl delete pvc xfs-pvc
+
+# Check the status of PVs again
+kubectl get pv
+```
+
+You should notice that the PV associated with xfs-pvc has been automatically deleted along with the PVC.
+
+### Task 9: Creating a Database with Persistent Storage
+
+Now let's create a practical example by deploying a MySQL database with persistent storage:
+
+```bash
+# Create a secret for MySQL password
+kubectl create secret generic mysql-pass --from-literal=password=your-password
+
+# Create a PVC for MySQL data
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: do-block-storage-xfs-retain
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+
+# Deploy MySQL with the PVC
+cat <<EOF | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-data-pvc
+EOF
+
+# Create a service for MySQL
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None
+EOF
+
+# Check deployment status
+kubectl get deployment mysql
+kubectl get pods -l app=mysql
+```
+
+Now let's initialize the database with some data:
+
+```bash
+# Get the MySQL pod name
+MYSQL_POD=$(kubectl get pods -l app=mysql -o jsonpath="{.items[0].metadata.name}")
+
+# Execute commands to create a database and table
+kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE test; USE test; CREATE TABLE messages (message VARCHAR(250)); INSERT INTO messages VALUES (\"Hello persistent storage!\");"'
+
+# Verify the data was created
+kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT * FROM test.messages;"'
+```
+
+Now let's simulate a failure by deleting the pod:
+
+```bash
+# Delete the MySQL pod
+kubectl delete pod $MYSQL_POD
+
+# Wait for the new pod to be ready
+kubectl get pods -l app=mysql -w
+# Press Ctrl+C when the pod is Running
+
+# Get the new pod name
+MYSQL_POD=$(kubectl get pods -l app=mysql -o jsonpath="{.items[0].metadata.name}")
+
+# Verify the data still exists
+kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT * FROM test.messages;"'
+```
+
+You should see "Hello persistent storage!" in the output, confirming that the database data persisted across pod restarts.
+
+### Task 10: Cleanup
+
+Before moving on to the next lab, let's clean up the resources we created:
+
+```bash
+# Delete the StatefulSet and headless service
+kubectl delete statefulset web
+kubectl delete service nginx-headless
+
+# Delete the MySQL deployment and service
+kubectl delete deployment mysql
+kubectl delete service mysql
+kubectl delete secret mysql-pass
+
+# Delete all pods
+kubectl delete pod pvc-demo-pod-2 xfs-demo-pod resize-check-pod
+
+# Delete all PVCs (except the one with retain policy, which we already deleted)
+kubectl delete pvc my-first-pvc xfs-pvc mysql-data-pvc
+kubectl delete pvc www-web-0 www-web-1
+
+# Verify cleanup
+kubectl get pvc
+kubectl get pods
+```
+
+## Lab Validation
+
+Let's confirm you've mastered the key concepts from this lab:
+
+- You understand the Kubernetes storage architecture
+- You can create and manage Persistent Volume Claims
+- You know how to use persistent storage with pods
+- You can resize volumes when needed
+- You understand how StatefulSets use persistent storage
+- You know the difference between Delete and Retain reclaim policies
+
+## Summary
+
+Congratulations! You have completed Lab 6 of the Kubernetes Fundamentals Workshop. In this lab, you've learned:
+
+1. How the Kubernetes storage system works with Storage Classes, PVs, and PVCs
+2. How to create and use Persistent Volume Claims
+3. How to ensure data persists across pod restarts and reschedules
+4. How to use different storage classes for different needs
+5. How to resize volumes when applications need more space
+6. How StatefulSets manage persistent storage for stateful applications
+7. The difference between Delete and Retain reclaim policies
+8. How to deploy a database with persistent storage
+
+These skills are essential for running stateful applications in Kubernetes, ensuring that your critical data remains safe and available even as pods come and go.
+
+## Next Steps
+
+Proceed to [Lab 7: Network Policies](7-network-policies.md) to learn how to secure communication between your pods.

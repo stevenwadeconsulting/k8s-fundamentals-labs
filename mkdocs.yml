@@ -1,0 +1,45 @@
+site_name: Kubernetes Fundamentals Labs
+site_url: https://stevenwadeconsulting.github.io/k8s-fundamentals-labs
+repo_name: stevenwadeconsulting/k8s-fundamentals-labs
+repo_url: https://github.com/stevenwadeconsulting/k8s-fundamentals-labs
+edit_uri: ""
+
+site_dir: public
+
+# Configuration
+theme:
+  name: material
+  language: en
+  palette:
+    primary: blue
+    accent: indigo
+  features:
+    - navigation.sections
+
+# Plugins
+plugins:
+  - search
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+# Page tree
+nav:
+  - Home: index.md
+  - Labs:
+      - 1. Initial Exploration: labs/1-essentials.md
+      - 2. Deployments: labs/2-deployments.md
+      - 3. DeamonSets: labs/3-daemonsets.md
+      - 4. Services: labs/4-services.md
+      - 5. Autoscaling: labs/5-autoscaling.md
+      - 6. Storage: labs/6-storage.md
+      - 7. Network Policies: labs/7-network-policies.md
+      - 8. RBAC: labs/8-rbac.md
+      - 9. Complete App: labs/9-complete-app.md
