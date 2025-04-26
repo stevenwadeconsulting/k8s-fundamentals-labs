@@ -41,20 +41,23 @@ kubectl config set-context --current --namespace=final-app
 
 Before diving into implementation, let's understand the architecture we'll be deploying:
 
-1. **Frontend Tier**: Web interface for users
-   - NGINX serving static content
-   - Exposed to external traffic
-   - Connects to the backend API
+**1. Frontend Tier**:
 
-2. **Backend API Tier**: Business logic layer
-   - Simple API service
-   - Internal only (not directly exposed)
-   - Connects to the database
+- NGINX serving static content
+- Exposed to external traffic
+- Connects to the backend API
 
-3. **Database Tier**: Data storage layer
-   - MySQL database
-   - Internal only
-   - Requires persistent storage
+**2. Backend API Tier**:
+
+- Simple API service
+- Internal only (not directly exposed)
+- Connects to the database
+
+**3. Database Tier**:
+
+- MySQL database
+- Internal only
+- Requires persistent storage
 
 Let's start by creating our configuration resources.
 
@@ -64,31 +67,10 @@ First, let's create ConfigMaps and Secrets to manage our application's configura
 
 ```bash
 # Create a ConfigMap for application configuration
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-data:
-  app.properties: |
-    title=Kubernetes Workshop Demo
-    color=blue
-    message=Hello from ConfigMap!
-  nginx.conf: |
-    server {
-      listen 80;
-      location / {
-        root /usr/share/nginx/html;
-        index index.html;
-      }
-      location /api {
-        proxy_pass http://backend-service;
-      }
-    }
-EOF
+kubectl apply -f app-configmap.yaml
 
 # Create a Secret for sensitive data
-kubectl create secret generic app-secrets \
+kubectl create secret generic app-secrets -n final-app \
   --from-literal=api-key=QWxhZGRpbjpvcGVuIHNlc2FtZQ== \
   --from-literal=db-password=VGhpcyBpcyB0aGUgc2VjcmV0IQ==
 
@@ -102,19 +84,7 @@ Our database will need persistent storage:
 
 ```bash
 # Create a PVC for database storage
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-data
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: do-block-storage-xfs-retain
-  resources:
-    requests:
-      storage: 1Gi
-EOF
+kubectl apply -f mysql-data-pvc.yaml
 
 # Verify the PVC is created
 kubectl get pvc
@@ -166,62 +136,7 @@ Now let's deploy our MySQL database:
 
 ```bash
 # Create the MySQL Deployment with persistent storage
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mysql
-spec:
-  selector:
-    matchLabels:
-      app: mysql
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      serviceAccountName: app-sa
-      containers:
-      - name: mysql
-        image: mysql:5.7
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: db-password
-        - name: MYSQL_DATABASE
-          value: appdb
-        ports:
-        - containerPort: 3306
-          name: mysql
-        volumeMounts:
-        - name: mysql-storage
-          mountPath: /var/lib/mysql
-        resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          tcpSocket:
-            port: 3306
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          tcpSocket:
-            port: 3306
-          initialDelaySeconds: 5
-          periodSeconds: 10
-      volumes:
-      - name: mysql-storage
-        persistentVolumeClaim:
-          claimName: mysql-data
-EOF
+kubectl apply -f mysql-deployment.yaml
 
 # Create a headless service for MySQL
 cat <<EOF | kubectl apply -f -
@@ -247,51 +162,7 @@ Next, let's deploy our backend API service:
 
 ```bash
 # Deploy the backend API
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: backend
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: backend
-  template:
-    metadata:
-      labels:
-        app: backend
-    spec:
-      serviceAccountName: app-sa
-      containers:
-      - name: api
-        image: hashicorp/http-echo:latest
-        args:
-        - "-text=API Response: Connected to database at \${DB_HOST}, API Key: \${API_KEY}"
-        ports:
-        - containerPort: 5678
-        env:
-        - name: DB_HOST
-          value: mysql
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: api-key
-        resources:
-          limits:
-            memory: "256Mi"
-            cpu: "300m"
-          requests:
-            memory: "128Mi"
-            cpu: "150m"
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 5678
-          initialDelaySeconds: 5
-          periodSeconds: 10
-EOF
+kubectl apply -f backend-deployment.yaml
 
 # Create a service for the backend (ClusterIP - internal only)
 cat <<EOF | kubectl apply -f -
@@ -351,144 +222,10 @@ Now, let's deploy our frontend:
 
 ```bash
 # Create frontend content ConfigMap
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: frontend-content
-data:
-  index.html: |
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Kubernetes Workshop Complete App</title>
-      <style>
-        body {
-          background-color: #3498db;
-          color: white;
-          font-family: Arial, sans-serif;
-          text-align: center;
-          padding-top: 100px;
-        }
-        .container {
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-          background-color: rgba(0,0,0,0.3);
-          border-radius: 10px;
-        }
-        button {
-          background-color: #2ecc71;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 16px;
-          margin-top: 20px;
-        }
-        #result {
-          margin-top: 20px;
-          padding: 10px;
-          background-color: rgba(0,0,0,0.2);
-          border-radius: 5px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>Kubernetes Workshop Complete App</h1>
-        <p>This application demonstrates concepts from this workshop:</p>
-        <ul style="text-align: left; display: inline-block;">
-          <li>Multi-tier architecture with frontend, backend, and database</li>
-          <li>ConfigMaps and Secrets for configuration</li>
-          <li>Persistent storage with PVCs</li>
-          <li>Service networking between components</li>
-          <li>RBAC with ServiceAccounts</li>
-          <li>Horizontal Pod Autoscaling</li>
-        </ul>
-        <button onclick="callApi()">Call Backend API</button>
-        <div id="result"></div>
-      </div>
-      <script>
-        function callApi() {
-          document.getElementById('result').innerHTML = 'Loading...';
-          fetch('/api')
-            .then(response => response.text())
-            .then(data => {
-              document.getElementById('result').innerHTML = data;
-            })
-            .catch(error => {
-              document.getElementById('result').innerHTML = 'Error: ' + error;
-            });
-        }
-      </script>
-    </body>
-    </html>
-EOF
+kubectl apply -f frontend-content-configmap.yaml
 
 # Deploy the frontend
-cat <<EOF | kubectl apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: frontend
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: frontend
-  template:
-    metadata:
-      labels:
-        app: frontend
-    spec:
-      serviceAccountName: app-sa
-      containers:
-      - name: nginx
-        image: nginx:1.21
-        ports:
-        - containerPort: 80
-        volumeMounts:
-        - name: nginx-config
-          mountPath: /etc/nginx/conf.d/default.conf
-          subPath: nginx.conf
-        - name: content
-          mountPath: /usr/share/nginx/html/index.html
-          subPath: index.html
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "200m"
-          requests:
-            memory: "64Mi"
-            cpu: "100m"
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 10
-      volumes:
-      - name: nginx-config
-        configMap:
-          name: app-config
-          items:
-          - key: nginx.conf
-            path: nginx.conf
-      - name: content
-        configMap:
-          name: frontend-content
-          items:
-          - key: index.html
-            path: index.html
-EOF
+kubectl apply -f frontend-deployment.yaml
 
 # Create a NodePort service for the frontend
 cat <<EOF | kubectl apply -f -
@@ -610,7 +347,7 @@ Now let's verify that our complete application is functioning:
 # Get the NodePort service details
 kubectl get service frontend-service
 
-# For local minikube, get the node IP
+# Get the node IP
 NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
 NODE_PORT=30080
 
@@ -624,8 +361,6 @@ kubectl get pods -l app=frontend
 kubectl get pods -l app=backend
 kubectl get pods -l app=mysql
 ```
-
-For a cloud-based workshop environment, your instructor will provide the appropriate IP address or hostname to access the application.
 
 ### Task 11: Troubleshooting and Verification
 
@@ -762,22 +497,22 @@ Now that you've completed the Kubernetes Fundamentals Workshop, consider these n
 
 **1. Explore Advanced Topics**:
 
-   - Kubernetes Operators and Custom Resources
-   - GitOps and CI/CD for Kubernetes
-   - Service Mesh technologies (like Istio or Linkerd)
-   - Advanced observability and monitoring
+- Kubernetes Operators and Custom Resources
+- GitOps and CI/CD for Kubernetes
+- Service Mesh technologies (like Istio or Linkerd)
+- Advanced observability and monitoring
 
 **2. Certifications**:
 
-   - Certified Kubernetes Administrator (CKA)
-   - Certified Kubernetes Application Developer (CKAD)
-   - Certified Kubernetes Security Specialist (CKS)
+- Certified Kubernetes Administrator (CKA)
+- Certified Kubernetes Application Developer (CKAD)
+- Certified Kubernetes Security Specialist (CKS)
 
 **3. Practice and Build**:
 
-   - Deploy your own applications on Kubernetes
-   - Contribute to open-source Kubernetes projects
-   - Set up a personal Kubernetes lab environment
+- Deploy your own applications on Kubernetes
+- Contribute to open-source Kubernetes projects
+- Set up a personal Kubernetes lab environment
 
 ## Your Feedback Matters!
 
