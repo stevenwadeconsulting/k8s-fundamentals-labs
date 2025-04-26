@@ -17,7 +17,7 @@ spec:
         - name: api
           image: hashicorp/http-echo:latest
           args:
-            - "-text=API Response: Connected to database at mysql"
+            - "-text={\"result\":\"API Response: Connected to database at mysql\"}"
           ports:
             - containerPort: 5678
           resources:

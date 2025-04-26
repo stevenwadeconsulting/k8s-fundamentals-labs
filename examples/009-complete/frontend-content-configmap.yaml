@@ -60,14 +60,14 @@ data:
         function callApi() {
             document.getElementById('result').innerHTML = 'Loading...';
             fetch('/api')
-                .then(response => response.text())
+                .then(response => response.json())  // Parse as JSON instead of text
                 .then(data => {
-                    document.getElementById('result').innerHTML = data;
+                    document.getElementById('result').innerHTML = data.result;  // Extract the result field
                 })
                 .catch(error => {
                     document.getElementById('result').innerHTML = 'Error: ' + error;
                 });
-        }
+       }
     </script>
     </body>
     </html>

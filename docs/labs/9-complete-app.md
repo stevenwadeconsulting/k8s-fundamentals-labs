@@ -234,7 +234,7 @@ kubectl apply -f frontend-content-configmap.yaml
 # Deploy the frontend
 kubectl apply -f frontend-deployment.yaml
 
-# Create a NodePort service for the frontend
+# Create a LoadBalancer service for the frontend
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Service
