@@ -140,11 +140,9 @@ If you encounter any issues during the labs:
 
 ## Feedback
 
-Your feedback is valuable! At the end of the workshop, please share your thoughts on:
-- Lab content and difficulty level
-- Workshop pace and structure
-- Areas for improvement
-- Additional topics you'd like to see covered
+Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our feedback form.
+
+Your input helps us improve future workshops and develop new content based on your needs and interests.
 
 ## License
 

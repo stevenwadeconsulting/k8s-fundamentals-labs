@@ -776,4 +776,8 @@ Now that you've completed the Kubernetes Fundamentals Workshop, consider these n
    - Contribute to open-source Kubernetes projects
    - Set up a personal Kubernetes lab environment
 
-Thank you for participating in this workshop!
+## Your Feedback Matters!
+
+Please take a moment to complete our workshop feedback form. Your insights are invaluable in helping us improve future workshops and develop content that best serves your learning needs.
+
+Finally, thank you for participating in this workshop!
