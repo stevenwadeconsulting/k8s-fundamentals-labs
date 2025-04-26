@@ -19,7 +19,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 3: DaemonSets
+- Completion of [Lab 3: DaemonSets](3-daemonsets.md)
 - Understanding of Pods and Deployments
 - Execute `cd ../004-services` to navigate to this lab directory
 

@@ -22,7 +22,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 6: Persistent Storage
+- Completion of [Lab 6: Persistent Storage](6-storage.md)
 - Understanding of basic Kubernetes concepts including namespaces and labels
 - Execute `cd ../007-network-policies` to navigate to this lab directory
 

@@ -18,7 +18,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 2: Deployments and Rolling Updates
+- Completion of [Lab 2: Deployments and Rolling Updates](2-deployments.md)
 - Understanding of basic Kubernetes concepts
 - Execute `cd ../003-daemonsets` to navigate to this lab directory
 

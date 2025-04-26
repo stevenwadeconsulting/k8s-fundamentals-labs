@@ -12,17 +12,18 @@ nav:
       - 1. Initial Exploration: labs/1-essentials.md
       - 2. Deployments: labs/2-deployments.md
       - 3. DeamonSets: labs/3-daemonsets.md
-      - 4. Services: labs/4-services.md
-      - 5. Autoscaling: labs/5-autoscaling.md
-      - 6. Storage: labs/6-storage.md
+      - 4. Services & Networking: labs/4-services.md
+      - 5. Horizontal Pod Autoscaling: labs/5-autoscaling.md
+      - 6. Persistent Storage: labs/6-storage.md
       - 7. Network Policies: labs/7-network-policies.md
-      - 8. RBAC: labs/8-rbac.md
-      - 9. Complete App: labs/9-complete-app.md
+      - 8. Role-Based Access Control: labs/8-rbac.md
+      - 9. Final Exercise: labs/9-complete-app.md
 
 # Configuration
 theme:
   feaures:
     - tabs
+    - navigation.sections
   name: material
   icon:
     logo: material/cloud
@@ -39,41 +40,13 @@ plugins:
 
 # Extensions
 markdown_extensions:
-  - markdown.extensions.admonition
-  - markdown.extensions.attr_list
-  - markdown.extensions.codehilite:
-      guess_lang: false
-  - markdown.extensions.def_list
-  - markdown.extensions.footnotes
-  - markdown.extensions.meta
-  - markdown.extensions.toc:
-      permalink: true
-  - pymdownx.arithmatex
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
-  - pymdownx.critic
-  - pymdownx.details
-  - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-        # - pymdownx.highlight:
-      #     linenums_style: pymdownx-inline
-  - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.magiclink:
-      repo_url_shorthand: true
-      user: squidfunk
-      repo: mkdocs-material
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.snippets:
-      check_paths: true
+  - admonition
+  - pymdownx.highlight
   - pymdownx.superfences
-  - pymdownx.tabbed
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.tilde
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
 
 extra:
   social:

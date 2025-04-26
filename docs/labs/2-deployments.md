@@ -19,7 +19,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 1: Initial Kubernetes Exploration
+- Completion of [Lab 1: Initial Kubernetes Exploration](1-essentials.md)
 - Understanding of basic Kubernetes concepts (Pods, namespaces)
 - Basic YAML knowledge
 - Execute `cd ../002-deployments` to navigate to this lab directory

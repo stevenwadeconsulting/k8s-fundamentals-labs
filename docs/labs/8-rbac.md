@@ -1,4 +1,4 @@
-# Lab 8: RBAC and Security
+# Lab 8: Role-Based Access Control (RBAC)
 
 ## Introduction
 
@@ -24,7 +24,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 7: Network Policies
+- Completion of [Lab 7: Network Policies](7-network-policies.md)
 - Basic understanding of Kubernetes resources and the Kubernetes API
 - Execute `cd ../008-rbac` to navigate to this lab directory
 

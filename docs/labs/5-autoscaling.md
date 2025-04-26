@@ -18,7 +18,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 4: Services and Networking
+- Completion of [Lab 4: Services and Networking](4-services.md)
 - Understanding of Deployments and resource management concepts
 - Execute `cd ../005-autoscaling` to navigate to this lab directory
 

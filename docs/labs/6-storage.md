@@ -19,7 +19,7 @@ By the end of this lab, you will be able to:
 
 ## Prerequisites
 
-- Completion of Lab 5: Horizontal Pod Autoscaling
+- Completion of [Lab 5: Horizontal Pod Autoscaling](5-autoscaling.md)
 - Basic understanding of storage concepts
 - Execute `cd ../006-storage` to navigate to this lab directory
 
