@@ -98,10 +98,6 @@ LoadBalancer services expose your application externally using your cloud provid
 ```bash
 # Create a LoadBalancer service
 kubectl apply -f backend-loadbalancer-service.yaml
-
-# Examine the service
-kubectl get service backend-loadbalancer
-kubectl describe service backend-loadbalancer
 ```
 
 Note these key details:
@@ -254,14 +250,10 @@ Unlike a regular service, DNS for a headless service:
 Before moving on to the next lab, let's clean up the resources we created:
 
 ```bash
-# Delete the load-test pod
-kubectl delete pod load-test
-
-# Delete services
-kubectl delete service backend-service backend-nodeport frontend-service multi-label-service multi-label-service-v2 backend-headless
-
-# Delete deployments
-kubectl delete deployment backend frontend multi-label-app multi-label-app-v2
+# Delete all resources created in this lab
+kubectl delete pod --all
+kubectl delete service --all
+kubectl delete deployment --all
 
 # Verify cleanup
 kubectl get services

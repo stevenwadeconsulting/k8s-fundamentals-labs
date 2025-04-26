@@ -191,14 +191,10 @@ After a few minutes, stop the load generator (Ctrl+C) and observe the scale-down
 Before moving on to the next lab, let's clean up the resources we created:
 
 ```bash
-# Delete HPAs
-kubectl delete hpa php-apache-v2
-
-# Delete deployments
-kubectl delete deployment resource-demo php-apache
-
-# Delete services
-kubectl delete service php-apache
+# Delete all resources created in this lab
+kubectl delete hpa --all
+kubectl delete deployment --all
+kubectl delete service --all
 
 # Verify cleanup
 kubectl get hpa

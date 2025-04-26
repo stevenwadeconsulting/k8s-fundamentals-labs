@@ -255,8 +255,7 @@ Before moving to the next lab, let's clean up the resources we created:
 
 ```bash
 # Delete the deployments
-kubectl delete deployment nginx-deployment
-kubectl delete deployment webserver-deployment
+kubectl delete deployment --all
 
 # Delete the ConfigMap and Secret
 kubectl delete configmap app-config

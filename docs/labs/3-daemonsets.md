@@ -238,12 +238,9 @@ kubectl logs $POD_NAME
 Before moving to the next lab, let's clean up the resources we created:
 
 ```bash
-# Delete the DaemonSets
-kubectl delete daemonset node-monitor
-kubectl delete daemonset log-collector
-
-# Delete the Deployment
-kubectl delete deployment comparison-deployment
+# Delete all resources created in this lab
+kubectl delete daemonset --all
+kubectl delete deployment --all
 
 # Verify cleanup
 kubectl get daemonsets
