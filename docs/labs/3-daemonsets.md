@@ -41,7 +41,7 @@ Let's create a DaemonSet that simulates a node monitoring agent:
 
 ```bash
 # Create a simple DaemonSet
-kubectl apply -f node-monitor-daemonset.yaml
+kubectl apply -f node-monitor-ds.yaml
 ```
 
 Now, let's verify that the DaemonSet was created and that it deployed pods to all nodes:
@@ -64,6 +64,7 @@ kubectl describe daemonset node-monitor
 ```
 
 Pay attention to these sections:
+
 - Desired Number of Nodes Scheduled (should match your node count)
 - Current Number of Nodes Scheduled
 - Selector (how it identifies which pods belong to it)
@@ -130,17 +131,6 @@ You can also view the update history:
 kubectl rollout history daemonset/node-monitor
 ```
 
-If needed, you can roll back to a previous version:
-
-```bash
-# Roll back to the previous version
-kubectl rollout undo daemonset/node-monitor
-
-# Verify the rollback
-kubectl rollout status daemonset/node-monitor
-kubectl describe pod $POD_NAME | grep Image:
-```
-
 ### Task 5: DaemonSet Scheduling with Node Selectors
 
 Sometimes you may want to run a DaemonSet only on a subset of nodes. Let's modify our DaemonSet to use node selectors:
@@ -190,6 +180,7 @@ kubectl get pods -l app=comparison -o wide
 ```
 
 Notice the key differences:
+
 1. The DaemonSet ensures exactly one pod per selected node
 2. The Deployment distributes pods across nodes based on available resources, which might mean multiple pods on some nodes and none on others
 

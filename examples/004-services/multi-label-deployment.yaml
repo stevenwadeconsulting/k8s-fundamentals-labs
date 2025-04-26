@@ -8,6 +8,7 @@ spec:
     matchLabels:
       app: multi-label
       tier: backend
+      version: v1
   template:
     metadata:
       labels:

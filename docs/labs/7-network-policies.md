@@ -158,6 +158,7 @@ kubectl run test-from-default --image=busybox --rm -it --restart=Never -n defaul
 ```
 
 You should see that:
+
 - The client pod can now access the backend (successful connections)
 - The "other" pod still cannot access the backend (connection failures)
 - Pods from other namespaces still cannot access the backend
@@ -233,6 +234,10 @@ You should observe that the client pod can connect to the backend but cannot rea
 ### Task 12: Cleanup
 
 Before moving on to the next lab, let's clean up the resources we created:
+
+!!! warning
+    This will take some time to complete, as it will delete all resources in the `netpol-test` namespace.
+
 
 ```bash
 # Delete test pods

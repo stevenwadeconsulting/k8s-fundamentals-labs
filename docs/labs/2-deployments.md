@@ -174,6 +174,8 @@ kubectl rollout undo deployment/nginx-deployment --to-revision=1
 
 # Verify the image version
 kubectl describe deployment nginx-deployment | grep Image:
+
+# Notice the image version is back to nginx:1.20
 ```
 
 ### Task 5: Working with ConfigMaps and Secrets

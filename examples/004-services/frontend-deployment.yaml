@@ -16,7 +16,7 @@ spec:
         - name: frontend
           image: hashicorp/http-echo:latest
           args:
-            - "-text=Frontend service connecting to backend at: \${BACKEND_URL}"
+            - "-text=Frontend service connecting to backend at: ${BACKEND_URL}"
           ports:
             - containerPort: 5678
           env:

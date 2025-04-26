@@ -93,11 +93,13 @@ kubectl describe role pod-and-service-reader
 This Role allows only "get", "watch", and "list" actions on pods and services within the current namespace.
 
 Understanding the components:
+
 - **apiGroups**: The API group containing the resources. The core group is represented by an empty string ""
 - **resources**: The resource types this role applies to
 - **verbs**: The allowed actions on these resources
 
 Common verbs include:
+
 - get: Retrieve a specific resource
 - list: List all resources of a type
 - watch: Stream updates to resources
@@ -175,12 +177,6 @@ Let's test the updated permissions:
 # Test listing deployments again (should now work)
 kubectl exec -it rbac-test-pod -- kubectl get deployments
 
-# Create a deployment to test
-kubectl create deployment nginx --image=nginx --replicas=2
-
-# Verify we can list the deployment
-kubectl exec -it rbac-test-pod -- kubectl get deployments
-
 # Test creating a deployment (should still fail)
 kubectl exec -it rbac-test-pod -- kubectl create deployment test --image=nginx
 ```
@@ -231,6 +227,7 @@ kubectl get clusterroles | grep -E 'admin|edit|view'
 ```
 
 These are the most commonly used default ClusterRoles:
+
 - `cluster-admin`: Full access to the entire cluster
 - `admin`: Full access within a namespace
 - `edit`: Read/write access to most resources within a namespace
@@ -254,22 +251,7 @@ kubectl exec -it rbac-test-pod -- kubectl get events
 
 The pod should now be able to view most resources in its namespace.
 
-### Task 11: Using Service Accounts with Deployments
-
-Service accounts are often used with Deployments. Let's create a Deployment that uses our service account:
-
-```bash
-# Create a Deployment that uses our service account
-kubectl apply -f rbac-test-app-deployment.yaml
-
-# Check that the deployment was created
-kubectl get deployments
-kubectl get pods -l app=rbac-test-app
-```
-
-Each pod in this deployment will use the `app-sa` service account, giving them the permissions we've defined.
-
-### Task 12: Inspecting RBAC with kubectl auth
+### Task 11: Inspecting RBAC with kubectl auth
 
 Kubernetes provides the `kubectl auth` command to help you understand and troubleshoot RBAC configurations:
 
@@ -289,7 +271,7 @@ kubectl auth can-i get pods --as=system:serviceaccount:rbac-test:app-sa --namesp
 
 These commands help you verify what actions a service account is allowed to perform without having to actually attempt those actions.
 
-### Task 13: RBAC Troubleshooting
+### Task 12: RBAC Troubleshooting
 
 When working with RBAC, you might encounter permission issues. Here's how to troubleshoot them:
 
@@ -333,25 +315,17 @@ kubectl exec -it troubleshoot-pod -- kubectl get pods
 Before moving on, let's clean up the resources we created:
 
 ```bash
-# Delete the deployments
-kubectl delete deployment rbac-test-app
-
-# Delete the pods
-kubectl delete pod rbac-test-pod troubleshoot-pod
-
-# Delete the rolebindings and clusterrolebindings
-kubectl delete rolebinding read-pods-and-services app-sa-view read-pods
+kubectl delete deployment --all
+kubectl delete pod --all
+kubectl delete role --all
+kubectl delete rolebinding --all
 kubectl delete clusterrolebinding read-nodes
 
-# Delete the roles and clusterroles
-kubectl delete role pod-and-service-reader pod-reader
+# Delete the clusterroles
 kubectl delete clusterrole node-reader
 
 # Delete the service accounts
 kubectl delete serviceaccount app-sa troubleshoot-sa
-
-# Delete the configmap
-kubectl delete configmap rbac-best-practices
 
 # Change back to default namespace
 kubectl config set-context --current --namespace=default

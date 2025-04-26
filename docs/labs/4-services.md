@@ -63,16 +63,18 @@ kubectl describe service backend-service
 ```
 
 Note the following in the service description:
-- Type: ClusterIP (the default)
-- ClusterIP: The virtual IP assigned to this service
-- Selector: How the service knows which pods to send traffic to
-- Endpoints: The actual pod IPs that are receiving traffic
+
+- **Type:** ClusterIP (the default)
+- **ClusterIP:** The virtual IP assigned to this service
+- **Selector:** How the service knows which pods to send traffic to
+- **Endpoints:** The actual pod IPs that are receiving traffic
 
 Let's test the service from within the cluster:
 
 ```bash
 # Create a temporary pod to test the service
-kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- backend-service
+kubectl run test-client --image=busybox:1.28 -- sleep 3600
+kubectl exec -it test-client -- wget -qO- backend-service
 ```
 
 You should see "Hello from the backend service" in the output, confirming the service works.
@@ -103,12 +105,14 @@ kubectl describe service backend-nodeport
 ```
 
 Note these key details:
-- Type: NodePort
-- NodePort: The port exposed on each node (30080)
-- Port: The internal cluster port (80)
-- TargetPort: The container port (5678)
+
+- **Type:** NodePort
+- **NodePort:** The port exposed on each node (30080)
+- **Port:** The internal cluster port (80)
+- **TargetPort:** The container port (5678)
 
 To access this service from outside the cluster, you need:
+
 1. The IP address of any node in the cluster
 2. The NodePort (30080)
 
@@ -119,36 +123,10 @@ kubectl get nodes -o wide
 
 In a real environment, you would access the service using:
 ```
-http://<node-ip>:30080
+http://<external-ip>:30080
 ```
 
-For cloud-hosted workshops, your instructor may provide the external IP or hostname to use.
-
-### Task 5: Service-to-Service Communication
-
-In microservice architectures, services often need to communicate with each other. Let's create a frontend service that communicates with our backend:
-
-```bash
-# Create a frontend deployment that will communicate with the backend
-kubectl apply -f frontend-deployment.yaml
-
-# Create a service for the frontend
-kubectl apply -f frontend-services.yaml
-
-# Verify both services
-kubectl get services
-```
-
-Now, let's test the service-to-service communication:
-
-```bash
-# Test the frontend service
-kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- frontend-service
-```
-
-You should see that the frontend service is able to reference the backend service by its DNS name.
-
-### Task 6: DNS-Based Service Discovery
+### Task 5: DNS-Based Service Discovery
 
 Kubernetes provides DNS-based service discovery through CoreDNS. Let's explore how this works:
 
@@ -165,28 +143,28 @@ nslookup backend-service
 nslookup frontend-service
 
 # Try the fully qualified domain name
-nslookup backend-service.workshop-$USER.svc.cluster.local
+nslookup backend-service.default.svc.cluster.local
 
 # Test connectivity using the DNS name
 wget -qO- backend-service
-wget -qO- frontend-service
 
 # Exit the pod
 exit
 ```
 
 Key points about Kubernetes DNS:
+
 - Services get DNS entries in the format: `<service-name>.<namespace>.svc.cluster.local`
 - Within the same namespace, you can use just the service name
 - The DNS resolves to the service's ClusterIP
 
-### Task 7: Service Load Balancing
+### Task 6: Service Load Balancing
 
 Let's examine how services distribute traffic across pods:
 
 ```bash
 # Scale up the backend service to better demonstrate load balancing
-kubectl scale deployment backend --replicas=5
+kubectl scale deployment backend --replicas=3
 
 # Wait for the new pods to be ready
 kubectl get pods -l app=backend
@@ -200,7 +178,7 @@ kubectl logs -f load-test
 
 You should see responses coming from different backend pods, demonstrating that the service is load-balancing requests. Press Ctrl+C to stop following the logs.
 
-### Task 8: Using Labels and Selectors with Services
+### Task 7: Using Labels and Selectors with Services
 
 Services use label selectors to determine which pods to send traffic to. Let's explore this more deeply:
 
@@ -212,7 +190,7 @@ kubectl apply -f multi-label-deployment.yaml
 kubectl apply -f multi-label-service.yaml
 
 # Test the service
-kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- multi-label-service
+kubectl exec -it test-client -- wget -qO- multi-label-service
 ```
 
 Now, let's deploy a v2 version and see how we can target specific versions:
@@ -225,13 +203,13 @@ kubectl apply -f multi-label-deployment-v2.yaml
 kubectl apply -f multi-label-service-v2.yaml
 
 # Test both services
-kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- multi-label-service
-kubectl run test-client --image=busybox:1.28 --rm -it -- wget -qO- multi-label-service-v2
+kubectl exec -it test-client -- wget -qO- multi-label-service
+kubectl exec -it test-client -- wget -qO- multi-label-service-v2
 ```
 
 Notice how the first service (without the version selector) sends traffic to all pods matching app=multi-label and tier=backend (both v1 and v2), while the second service only sends traffic to v2 pods.
 
-### Task 9: Headless Services
+### Task 8: Headless Services
 
 Sometimes you need direct access to specific pods rather than load-balanced access. Headless services provide this capability:
 
@@ -261,9 +239,11 @@ nslookup backend-headless
 exit
 ```
 
-Unlike a regular service, DNS for a headless service returns the IP addresses of all the individual pods, not a single service IP.
+Unlike a regular service, DNS for a headless service:
 
-### Task 10: Cleanup
+- Returns the IP addresses of all the individual pods, not a single service IP.
+
+### Task 9: Cleanup
 
 Before moving on to the next lab, let's clean up the resources we created:
 

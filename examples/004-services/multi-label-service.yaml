@@ -6,6 +6,7 @@ spec:
   selector:
     app: multi-label
     tier: backend
+    version: v1
   ports:
     - port: 80
       targetPort: 5678

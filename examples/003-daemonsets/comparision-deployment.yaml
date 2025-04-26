@@ -20,7 +20,7 @@ spec:
           command:
             - /bin/sh
             - -c
-            - "while true; do echo Running on \$(hostname); sleep 300; done"
+            - "while true; do echo Running on $(hostname); sleep 300; done"
           resources:
             limits:
               memory: "64Mi"

@@ -20,7 +20,7 @@ By the end of this lab, you will be able to:
 
 - Access to your assigned Kubernetes cluster
 - Basic familiarity with command-line interfaces
-- Execute `cd ../001-essentials` to navigate to this lab directory
+- Execute `cd 001-essentials` to navigate to this lab directory
 
 ## Lab Environment Validation
 
@@ -86,21 +86,6 @@ kubectl get namespaces
 kubectl describe namespace default
 ```
 
-Now, create your own namespace for the workshop:
-
-```bash
-# Create a personal namespace using your name (no spaces allowed)
-kubectl create namespace workshop-$USER
-
-# Set this namespace as your default for subsequent commands
-kubectl config set-context --current --namespace=workshop-$USER
-
-# Verify your namespace is set as default
-kubectl config view --minify | grep namespace:
-```
-
-Throughout the rest of the workshop, you'll deploy resources to your personal namespace to avoid conflicts with other participants.
-
 ### Task 3: API Resource Types
 
 Kubernetes has many types of resources. Let's explore them:
@@ -157,32 +142,12 @@ Review the important sections in the pod description:
 
 ### Task 5: Interacting with Your Pod
 
-Let's access the application running in your pod:
-
-```bash
-# Forward a local port to the pod
-kubectl port-forward nginx-pod 8080:80
-```
-
-Now open a new terminal window and use curl to access the application:
-
-```bash
-curl localhost:8080
-```
-
-You should see the default Nginx welcome page HTML. Press `Ctrl+C` in the original terminal to stop the port forwarding.
-
-Next, let's view the logs from the pod:
+Let's view the logs from the pod:
 
 ```bash
 # View the logs
 kubectl logs nginx-pod
-
-# Follow the logs in real-time
-kubectl logs -f nginx-pod
 ```
-
-Press `Ctrl+C` to stop following the logs.
 
 Now, let's execute commands inside the container:
 
@@ -192,7 +157,6 @@ kubectl exec -it nginx-pod -- /bin/bash
 
 # Inside the container, check that nginx is running
 curl localhost
-ps aux | grep nginx
 exit
 ```
 

@@ -45,6 +45,7 @@ kubectl describe pod -l app=resource-demo | grep -A3 Limits -B2
 ```
 
 Key points about resources:
+
 - CPU requests are specified in "millicores" (m). 100m = 0.1 CPU core
 - Memory requests are specified in bytes, or with suffixes like Mi (mebibyte) or Gi (gibibytes)
 - Resource requests are used for scheduling decisions
@@ -56,7 +57,7 @@ Let's create an application that we can use to test autoscaling. We'll use the `
 
 ```bash
 # Create a deployment with defined CPU resource requests
-kubectl apply -f resource-deployment.yaml
+kubectl apply -f php-apache-deployment.yaml
 
 # Create a service for the deployment
 kubectl expose deployment php-apache --port=80
@@ -74,7 +75,7 @@ Now let's create an HPA that will automatically scale our deployment based on CP
 
 ```bash
 # Create an HPA targeting 50% CPU utilization
-kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=3
 
 # Check the HPA status
 kubectl get hpa
@@ -88,8 +89,9 @@ kubectl describe hpa php-apache
 ```
 
 Key points about the HPA:
+
 - Target: The deployment we're scaling (php-apache)
-- Min and Max Replicas: The scaling boundaries (1-10 pods)
+- Min and Max Replicas: The scaling boundaries (1-3 pods)
 - Target CPU Utilisation: 50% of the requested CPU
 - Current CPU Utilisation: The current average across all pods
 - Current Replicas: The current number of pods
@@ -135,6 +137,7 @@ kubectl describe hpa php-apache
 Look at the "Events" section, which shows the scaling decisions that the HPA has made, including any scale-up or scale-down actions.
 
 The HPA controller follows these general rules:
+
 1. It checks metrics at a regular interval (default: 15 seconds)
 2. It calculates the desired number of replicas based on current/target metric values
 3. It applies a stabilisation window to prevent "thrashing" (rapid scaling up and down)
@@ -157,6 +160,7 @@ kubectl describe hpa php-apache-v2
 ```
 
 Key features of this advanced HPA:
+
 - Uses the newer v2 API which supports multiple metrics
 - Configures scaling behaviour for both scale-up and scale-down events
 - Scales down slowly (10% every 60 seconds, with a 300-second stabilization window)

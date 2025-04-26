@@ -45,12 +45,14 @@ kubectl describe storageclass do-block-storage
 ```
 
 In this lab environment, you have several Digital Ocean storage classes available:
+
 - `do-block-storage` (default): Uses ext4 filesystem with Delete reclaim policy
 - `do-block-storage-retain`: Uses ext4 filesystem with Retain reclaim policy
 - `do-block-storage-xfs`: Uses XFS filesystem with Delete reclaim policy
 - `do-block-storage-xfs-retain`: Uses XFS filesystem with Retain reclaim policy
 
 Note these key attributes for each storage class:
+
 - **Provisioner**: The plugin that creates the actual storage
 - **ReclaimPolicy**: What happens to the storage when a PVC is deleted (Delete or Retain)
 - **VolumeBindingMode**: When the actual storage is provisioned
@@ -80,6 +82,7 @@ kubectl describe pv $PV_NAME
 ```
 
 Key points to note:
+
 - The PV was dynamically provisioned by the storage class
 - It has the same size as requested in the PVC
 - The access mode is ReadWriteOnce (RWO), meaning it can be mounted as read-write by a single node
@@ -191,7 +194,9 @@ You should see that the volume now has approximately 2GB of space.
 
 ### Task 7: Working with StatefulSets
 
-StatefulSets are designed for stateful applications that need stable, persistent storage. Let's deploy a StatefulSet that uses PVCs:
+StatefulSets are designed for stateful applications that need stable, persistent storage.
+
+Let's deploy a StatefulSet that uses PVCs:
 
 ```bash
 # Create a headless service for the StatefulSet
@@ -230,8 +235,8 @@ Now, let's delete the pods and verify that the data persists:
 kubectl delete pod web-0 web-1
 
 # Wait for the pods to be recreated
-kubectl get pods -w
-# Press Ctrl+C when both pods are Running again
+kubectl get pods
+# Wait until both pods are Running again
 
 # Verify the data still exists
 kubectl exec -it web-0 -- cat /usr/share/nginx/html/index.html
@@ -263,92 +268,19 @@ kubectl get pv
 
 You should notice that the PV associated with the retain-pvc still exists but in the "Released" state. This is because the storage class uses the "Retain" reclaim policy, which preserves the data even after the PVC is deleted.
 
-For comparison, let's also delete a PVC with the "Delete" reclaim policy:
-
-```bash
-# Delete the xfs-pvc (which uses a storage class with Delete policy)
-kubectl delete pvc xfs-pvc
-
-# Check the status of PVs again
-kubectl get pv
-```
-
-You should notice that the PV associated with xfs-pvc has been automatically deleted along with the PVC.
-
-### Task 9: Creating a Database with Persistent Storage
-
-Now let's create a practical example by deploying a MySQL database with persistent storage:
-
-```bash
-# Create a secret for MySQL password
-kubectl create secret generic mysql-pass --from-literal=password=your-password
-
-# Create a PVC for MySQL data
-kubectl apply -f mysql-data-pvc.yaml
-
-# Deploy MySQL with the PVC
-kubectl apply -f mysql-deployment.yaml
-
-# Create a service for MySQL
-kubectl apply -f mysql-service.yaml
-
-# Check deployment status
-kubectl get deployment mysql
-kubectl get pods -l app=mysql
-```
-
-Now let's initialize the database with some data:
-
-```bash
-# Get the MySQL pod name
-MYSQL_POD=$(kubectl get pods -l app=mysql -o jsonpath="{.items[0].metadata.name}")
-
-# Execute commands to create a database and table
-kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE test; USE test; CREATE TABLE messages (message VARCHAR(250)); INSERT INTO messages VALUES (\"Hello persistent storage!\");"'
-
-# Verify the data was created
-kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT * FROM test.messages;"'
-```
-
-Now let's simulate a failure by deleting the pod:
-
-```bash
-# Delete the MySQL pod
-kubectl delete pod $MYSQL_POD
-
-# Wait for the new pod to be ready
-kubectl get pods -l app=mysql -w
-# Press Ctrl+C when the pod is Running
-
-# Get the new pod name
-MYSQL_POD=$(kubectl get pods -l app=mysql -o jsonpath="{.items[0].metadata.name}")
-
-# Verify the data still exists
-kubectl exec -it $MYSQL_POD -- bash -c 'mysql -u root -p$MYSQL_ROOT_PASSWORD -e "SELECT * FROM test.messages;"'
-```
-
-You should see "Hello persistent storage!" in the output, confirming that the database data persisted across pod restarts.
-
-### Task 10: Cleanup
+### Task 9: Cleanup
 
 Before moving on to the next lab, let's clean up the resources we created:
 
 ```bash
-# Delete the StatefulSet and headless service
-kubectl delete statefulset web
-kubectl delete service nginx-headless
-
-# Delete the MySQL deployment and service
-kubectl delete deployment mysql
-kubectl delete service mysql
+# Delete all resources created in this lab
+kubectl delete statefulset --all
+kubectl delete service --all
+kubectl delete deployment --all
+kubectl delete pod --all
 kubectl delete secret mysql-pass
-
-# Delete all pods
-kubectl delete pod pvc-demo-pod-2 xfs-demo-pod resize-check-pod
-
-# Delete all PVCs (except the one with retain policy, which we already deleted)
-kubectl delete pvc my-first-pvc xfs-pvc mysql-data-pvc
-kubectl delete pvc www-web-0 www-web-1
+kubectl delete pvc --all
+kubectl delete pv --all
 
 # Verify cleanup
 kubectl get pvc
