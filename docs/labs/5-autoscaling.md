@@ -74,6 +74,9 @@ The container image (`registry.k8s.io/hpa-example`) runs a simple PHP applicatio
 Now let's create an HPA that will automatically scale our deployment based on CPU utilisation:
 
 ```bash
+# First we need to install the metrics server
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
 # Create an HPA targeting 50% CPU utilization
 kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=3
 
@@ -102,7 +105,7 @@ Now let's generate load to test our autoscaler. We'll run a container that sends
 
 ```bash
 # Start a load generator
-kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+kubectl run memory-hog --image=busybox -- /bin/sh -c 'while true; do for i in $(seq 1 30); do wget -q -O- "http://php-apache" > /dev/null & done; sleep 0.1; done'
 ```
 
 In a separate terminal, monitor the HPA status:

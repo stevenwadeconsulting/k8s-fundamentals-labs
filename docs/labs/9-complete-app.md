@@ -205,18 +205,15 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: backend
-  minReplicas: 2
+  minReplicas: 1
   maxReplicas: 5
   metrics:
   - type: Resource
     resource:
-      name: cpu
+      name: memory
       target:
         type: Utilization
-        averageUtilization: 50
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
+        averageUtilization: 20
 EOF
 
 # Verify the HPA
@@ -368,27 +365,7 @@ kubectl get pods -l app=backend
 kubectl get pods -l app=mysql
 ```
 
-### Task 11: Troubleshooting and Verification
-
-Let's verify that our application tiers can communicate with each other properly:
-
-```bash
-# Get a frontend pod
-FRONTEND_POD=$(kubectl get pod -l app=frontend -o jsonpath='{.items[0].metadata.name}')
-
-# Test connectivity to backend service
-kubectl exec -it $FRONTEND_POD -- curl backend-service
-
-# Get a backend pod
-BACKEND_POD=$(kubectl get pod -l app=backend -o jsonpath='{.items[0].metadata.name}')
-
-# Verify MySQL is running
-kubectl get pods -l app=mysql
-MYSQL_POD=$(kubectl get pod -l app=mysql -o jsonpath='{.items[0].metadata.name}')
-kubectl logs $MYSQL_POD
-```
-
-### Task 12: Experimenting with Autoscaling
+### Task 11: Experimenting with Autoscaling
 
 Let's test the autoscaling functionality:
 
@@ -440,12 +417,6 @@ After completing all exercises, clean up the resources:
 ```bash
 # Delete all resources in the namespace
 kubectl delete all --all
-
-# Delete the ConfigMaps and Secrets
-kubectl delete configmap app-config frontend-content
-kubectl delete secret app-secrets
-
-# Delete Network Policies
 kubectl delete networkpolicy --all
 
 # Delete PVCs
