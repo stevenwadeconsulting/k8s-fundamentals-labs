@@ -1,4 +1,4 @@
-site_name: Kubernetes Fundamentals Labs
+site_name: Kubernetes Fundamentals
 site_url: https://stevenwadeconsulting.github.io/k8s-fundamentals-labs
 repo_name: stevenwadeconsulting/k8s-fundamentals-labs
 repo_url: https://github.com/stevenwadeconsulting/k8s-fundamentals-labs
@@ -8,6 +8,7 @@ site_dir: public
 # Page tree
 nav:
   - Home: index.md
+  - About Your Instructor: about-instructor.md
   - Labs:
       - 1. Initial Exploration: labs/1-essentials.md
       - 2. Deployments: labs/2-deployments.md
@@ -18,15 +19,19 @@ nav:
       - 7. Network Policies: labs/7-network-policies.md
       - 8. Role-Based Access Control: labs/8-rbac.md
       - 9. Final Exercise: labs/9-complete-app.md
+  - Provide Feedback: https://forms.gle/HxoVhSZRNk49BweS9
 
 # Configuration
 theme:
-  feaures:
+  language: en
+  features:
     - tabs
     - navigation.sections
+    - content.code.copy
   name: material
   icon:
     logo: material/cloud
+    repo: fontawesome/brands/github
   font:
     text: Ubuntu
     code: Ubuntu Mono
@@ -34,14 +39,15 @@ theme:
 # Plugins
 plugins:
   - search
-  - privacy:
-      links_attr_map:
-        target: _blank
 
 # Extensions
 markdown_extensions:
-  - admonition
-  - pymdownx.highlight
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.tabbed:
       alternate_style: true
@@ -49,6 +55,7 @@ markdown_extensions:
       permalink: true
 
 extra:
+  generator: false
   social:
     - icon: fontawesome/brands/github-alt
       link: https://github.com/swade1987

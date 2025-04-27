@@ -87,7 +87,7 @@ The workshop consists of eight hands-on labs, each focusing on different aspects
     - Stateful applications with persistent storage
     - Volume resize operations
 
-7. **[Network Policies](labs/7-networkpolicies.md)**
+7. **[Network Policies](labs/7-network-policies.md)**
     - Securing pod-to-pod communication
     - Implementing default deny policies
     - Allowing specific traffic patterns
@@ -141,10 +141,6 @@ If you encounter any issues during the labs:
 
 ## Feedback
 
-Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our [feedback form](https://forms.gle/HxoVhSZRNk49BweS9){target="_blank"}.
+Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our [feedback form](https://forms.gle/HxoVhSZRNk49BweS9).
 
 Your input helps us improve future workshops and develop new content based on your needs and interests.
-
-## License
-
-This workshop material is available under the [MIT License](LICENSE).
