@@ -21,7 +21,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 3: DaemonSets](3-daemonsets.md)
 - Understanding of Pods and Deployments
-- Execute `cd ../004-services` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../004-services` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -62,12 +64,13 @@ kubectl get service backend-service
 kubectl describe service backend-service
 ```
 
-Note the following in the service description:
+!!! note
+    The service description provides important information about how the service is configured. Pay attention to:
 
-- **Type:** ClusterIP (the default)
-- **ClusterIP:** The virtual IP assigned to this service
-- **Selector:** How the service knows which pods to send traffic to
-- **Endpoints:** The actual pod IPs that are receiving traffic
+    - **Type:** ClusterIP (the default)
+    - **ClusterIP:** The virtual IP assigned to this service
+    - **Selector:** How the service knows which pods to send traffic to
+    - **Endpoints:** The actual pod IPs that are receiving traffic
 
 Let's test the service from within the cluster:
 
@@ -100,12 +103,13 @@ LoadBalancer services expose your application externally using your cloud provid
 kubectl apply -f backend-loadbalancer-service.yaml
 ```
 
-Note these key details:
+!!! note
+    Note these key details:
 
-- **Type:** LoadBalancer
-- **External IP:** The IP address assigned by Digital Ocean
-- **Port:** The port your service is exposed on (80)
-- **TargetPort:** The container port (5678)
+    - **Type:** LoadBalancer
+    - **External IP:** The IP address assigned by Digital Ocean
+    - **Port:** The port your service is exposed on (80)
+    - **TargetPort:** The container port (5678)
 
 After applying this service, Digital Ocean will provision a load balancer and assign it an external IP address. It may take a minute or two for the external IP to be assigned:
 
@@ -121,12 +125,13 @@ You can access your service using:
 http://<external-ip>
 ```
 
-The LoadBalancer service type provides an easier and more robust way to expose your applications to the internet compared to NodePort, as it:
+!!! tip
+    The LoadBalancer service type provides an easier and more robust way to expose your applications to the internet compared to NodePort, as it:
 
-- Creates an actual load balancer in your cloud provider
-- Provides a stable external IP
-- Handles traffic distribution automatically
-- Doesn't require knowing node IPs or specific ports
+    - Creates an actual load balancer in your cloud provider
+    - Provides a stable external IP
+    - Handles traffic distribution automatically
+    - Doesn't require knowing node IPs or specific ports
 
 ### Task 5: DNS-Based Service Discovery
 
@@ -154,11 +159,12 @@ wget -qO- backend-service
 exit
 ```
 
-Key points about Kubernetes DNS:
+!!! note
+    Key points about Kubernetes DNS:
 
-- Services get DNS entries in the format: `<service-name>.<namespace>.svc.cluster.local`
-- Within the same namespace, you can use just the service name
-- The DNS resolves to the service's ClusterIP
+    - Services get DNS entries in the format: `<service-name>.<namespace>.svc.cluster.local`
+    - Within the same namespace, you can use just the service name
+    - The DNS resolves to the service's ClusterIP
 
 ### Task 6: Service Load Balancing
 
@@ -209,7 +215,8 @@ kubectl exec -it test-client -- wget -qO- multi-label-service
 kubectl exec -it test-client -- wget -qO- multi-label-service-v2
 ```
 
-Notice how the first service (without the version selector) sends traffic to all pods matching app=multi-label and tier=backend (both v1 and v2), while the second service only sends traffic to v2 pods.
+!!! info
+    Notice how the first service (without the version selector) sends traffic to all pods matching app=multi-label and tier=backend (both v1 and v2), while the second service only sends traffic to v2 pods.
 
 ### Task 8: Headless Services
 

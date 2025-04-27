@@ -21,7 +21,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 5: Horizontal Pod Autoscaling](5-autoscaling.md)
 - Basic understanding of storage concepts
-- Execute `cd ../006-storage` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../006-storage` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -81,12 +83,13 @@ export PV_NAME=$(kubectl get pvc my-first-pvc -o jsonpath='{.spec.volumeName}')
 kubectl describe pv $PV_NAME
 ```
 
-Key points to note:
+!!! note
+    Key points:
 
-- The PV was dynamically provisioned by the storage class
-- It has the same size as requested in the PVC
-- The access mode is ReadWriteOnce (RWO), meaning it can be mounted as read-write by a single node
-- It's bound to your specific PVC
+    - The PV was dynamically provisioned by the storage class
+    - It has the same size as requested in the PVC
+    - The access mode is ReadWriteOnce (RWO), meaning it can be mounted as read-write by a single node
+    - It's bound to your specific PVC
 
 ### Task 3: Using a PVC with a Pod
 
@@ -266,7 +269,10 @@ kubectl delete pvc retain-pvc
 kubectl get pv
 ```
 
-You should notice that the PV associated with the retain-pvc still exists but in the "Released" state. This is because the storage class uses the "Retain" reclaim policy, which preserves the data even after the PVC is deleted.
+!!! note
+    You should notice that the PV associated with the retain-pvc still exists but in the "Released" state.
+
+    This is because the storage class uses the "Retain" reclaim policy, which preserves the data even after the PVC is deleted.
 
 ### Task 9: Cleanup
 

@@ -24,7 +24,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 6: Persistent Storage](6-storage.md)
 - Understanding of basic Kubernetes concepts including namespaces and labels
-- Execute `cd ../007-network-policies` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../007-network-policies` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -157,11 +159,12 @@ kubectl logs --tail=5 $OTHER_POD
 kubectl run test-from-default --image=busybox --rm -it --restart=Never -n default -- wget -O- --timeout=2 http://backend.netpol-test
 ```
 
-You should see that:
+!!! note
+    You should see that:
 
-- The client pod can now access the backend (successful connections)
-- The "other" pod still cannot access the backend (connection failures)
-- Pods from other namespaces still cannot access the backend
+    - The client pod can now access the backend (successful connections)
+    - The "other" pod still cannot access the backend (connection failures)
+    - Pods from other namespaces still cannot access the backend
 
 ### Task 8: Allowing Traffic from Other Namespaces
 

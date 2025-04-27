@@ -26,7 +26,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 7: Network Policies](7-network-policies.md)
 - Basic understanding of Kubernetes resources and the Kubernetes API
-- Execute `cd ../008-rbac` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../008-rbac` to navigate to this lab directory
 
 ## Lab Environment Validation
 
@@ -73,7 +75,9 @@ kubectl get serviceaccounts
 kubectl describe serviceaccount app-sa
 ```
 
-Every service account automatically gets a secret that contains a token for authenticating with the Kubernetes API. In newer versions of Kubernetes, these tokens are created on demand when mounting the service account to a pod.
+!!! info
+    Every service account automatically gets a secret that contains a token for authenticating with the Kubernetes API.
+    In newer versions of Kubernetes, these tokens are created on demand when mounting the service account to a pod.
 
 ### Task 3: Creating a Role with Limited Permissions
 
@@ -226,12 +230,13 @@ Kubernetes provides some built-in ClusterRoles that you can reference in your Ro
 kubectl get clusterroles | grep -E 'admin|edit|view'
 ```
 
-These are the most commonly used default ClusterRoles:
+!!! info
+    These are the most commonly used default ClusterRoles:
 
-- `cluster-admin`: Full access to the entire cluster
-- `admin`: Full access within a namespace
-- `edit`: Read/write access to most resources within a namespace
-- `view`: Read-only access to most resources within a namespace
+    - `cluster-admin`: Full access to the entire cluster
+    - `admin`: Full access within a namespace
+    - `edit`: Read/write access to most resources within a namespace
+    - `view`: Read-only access to most resources within a namespace
 
 Let's create a RoleBinding that gives our service account view-only access to most resources:
 
@@ -273,13 +278,14 @@ These commands help you verify what actions a service account is allowed to perf
 
 ### Task 12: RBAC Troubleshooting
 
-When working with RBAC, you might encounter permission issues. Here's how to troubleshoot them:
+!!! tip
+    When working with RBAC, you might encounter permission issues. Here's how to troubleshoot them:
 
-1. **Check API Server Logs**: Look for "Forbidden" messages
-2. **Use the Kubernetes API**: Try operations directly against the API
-3. **Test with kubectl auth**: Use `kubectl auth can-i` to check permissions
-4. **Verify RoleBinding Subjects**: Ensure they reference the correct service account
-5. **Check for Typos**: Verify resource names, apiGroups, and verbs for typos
+    1. **Check API Server Logs**: Look for "Forbidden" messages
+    2. **Use the Kubernetes API**: Try operations directly against the API
+    3. **Test with kubectl auth**: Use `kubectl auth can-i` to check permissions
+    4. **Verify RoleBinding Subjects**: Ensure they reference the correct service account
+    5. **Check for Typos**: Verify resource names, apiGroups, and verbs for typos
 
 Let's create a pod with deliberately incorrect permissions to practice troubleshooting:
 

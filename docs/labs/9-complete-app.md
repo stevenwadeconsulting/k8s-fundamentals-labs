@@ -23,6 +23,9 @@ By the end of this lab, you will be able to:
 - Completion of all previous labs in the workshop
 - Understanding of all core Kubernetes concepts
 
+!!! warning
+    Execute `cd ../009-complete-app` to navigate to this lab directory
+
 ## Lab Environment Validation
 
 Let's create a dedicated namespace for our final exercise:
@@ -34,8 +37,6 @@ kubectl create namespace final-app
 # Use this namespace for subsequent commands
 kubectl config set-context --current --namespace=final-app
 
-# Move to the correct examples directory
-cd ../009-complete
 ```
 
 ## Lab Tasks
