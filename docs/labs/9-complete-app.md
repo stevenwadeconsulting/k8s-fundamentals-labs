@@ -387,7 +387,7 @@ After observing the scaling behavior, stop the load test:
 kubectl delete pod load-generator
 ```
 
-### Task 13: Practicing Disaster Recovery
+### Task 12: Practicing Disaster Recovery
 
 Let's practice some disaster recovery scenarios:
 
@@ -410,7 +410,7 @@ kubectl get pods -l app=mysql --watch
 kubectl exec -it $(kubectl get pod -l app=mysql -o jsonpath='{.items[0].metadata.name}') -- mysql -u root -p$MYSQL_ROOT_PASSWORD -e "SHOW DATABASES;"
 ```
 
-### Task 14: Cleanup
+### Task 13: Cleanup
 
 After completing all exercises, clean up the resources:
 
@@ -489,7 +489,7 @@ Now that you've completed the Kubernetes Fundamentals Workshop, consider these n
 
 ## Your Feedback Matters!
 
-Please take a moment to complete our [workshop feedback form](https://forms.gle/HxoVhSZRNk49BweS9){target="_blank"}.
+Please take a moment to complete our [workshop feedback form](https://forms.gle/HxoVhSZRNk49BweS9).
 
 Your insights are invaluable in helping us improve future workshops and develop content that best serves your learning needs.
 

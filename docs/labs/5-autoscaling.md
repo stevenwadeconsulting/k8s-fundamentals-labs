@@ -186,7 +186,7 @@ kubectl get pods -l run=php-apache
 
 After a few minutes, stop the load generator (Ctrl+C) and observe the scale-down behaviour, which should be more gradual than before.
 
-### Task 9: Cleanup
+### Task 7: Cleanup
 
 Before moving on to the next lab, let's clean up the resources we created:
 
