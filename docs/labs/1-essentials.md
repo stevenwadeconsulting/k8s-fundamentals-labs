@@ -20,7 +20,9 @@ By the end of this lab, you will be able to:
 
 - Access to your assigned Kubernetes cluster
 - Basic familiarity with command-line interfaces
-- Execute `cd 001-essentials` to navigate to this lab directory
+
+!!! warning
+    Execute `cd 001-essentials` to navigate to this lab directory
 
 ## Lab Environment Validation
 
@@ -136,6 +138,7 @@ kubectl describe pod nginx-pod
 ```
 
 Review the important sections in the pod description:
+
 - Container statuses
 - Events at the bottom (useful for troubleshooting)
 - Assigned IP address

@@ -2,6 +2,8 @@
 
 ## Professional Background
 
+Hey :wave: I'm Steven Wade, and I'm excited to be your instructor for this Kubernetes workshop!
+
 I am an industry veteran with extensive experience in cloud-native technologies, having worked with Kubernetes since version 1.2 (circa 2016). With nearly a decade of hands-on Kubernetes experience, I've witnessed and participated in its evolution from an emerging technology to the industry standard for container orchestration.
 
 My journey with Kubernetes has included:

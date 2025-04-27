@@ -20,7 +20,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 2: Deployments and Rolling Updates](2-deployments.md)
 - Understanding of basic Kubernetes concepts
-- Execute `cd ../003-daemonsets` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../003-daemonsets` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -63,12 +65,13 @@ Let's examine the DaemonSet in more detail:
 kubectl describe daemonset node-monitor
 ```
 
-Pay attention to these sections:
+!!! info
+    Pay attention to these sections:
 
-- Desired Number of Nodes Scheduled (should match your node count)
-- Current Number of Nodes Scheduled
-- Selector (how it identifies which pods belong to it)
-- Pod Template (the pod specification)
+    - Desired Number of Nodes Scheduled (should match your node count)
+    - Current Number of Nodes Scheduled
+    - Selector (how it identifies which pods belong to it)
+    - Pod Template (the pod specification)
 
 ### Task 3: Examining DaemonSet Behavior
 
@@ -99,7 +102,10 @@ kubectl delete pod $POD_NAME
 kubectl get pods -l app=node-monitor
 ```
 
-You'll notice that Kubernetes immediately creates a replacement pod. This is because the DaemonSet controller constantly ensures that a pod matching its specification runs on every node.
+!!! info
+    You'll notice that Kubernetes immediately creates a replacement pod.
+
+    This is because the DaemonSet controller constantly ensures that a pod matching its specification runs on every node.
 
 ### Task 4: Updating a DaemonSet
 
@@ -179,10 +185,11 @@ echo "Deployment pod locations:"
 kubectl get pods -l app=comparison -o wide
 ```
 
-Notice the key differences:
+!!! note
+    Notice the key differences:
 
-1. The DaemonSet ensures exactly one pod per selected node
-2. The Deployment distributes pods across nodes based on available resources, which might mean multiple pods on some nodes and none on others
+    1. The DaemonSet ensures exactly one pod per selected node
+    2. The Deployment distributes pods across nodes based on available resources, which might mean multiple pods on some nodes and none on others
 
 Let's simulate a node failure by cordoning a node (marking it as unschedulable):
 

@@ -22,7 +22,9 @@ By the end of this lab, you will be able to:
 - Completion of [Lab 1: Initial Kubernetes Exploration](1-essentials.md)
 - Understanding of basic Kubernetes concepts (Pods, namespaces)
 - Basic YAML knowledge
-- Execute `cd ../002-deployments` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../002-deployments` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -48,7 +50,10 @@ kubectl get pods -l app=nginx
 kubectl get replicasets
 ```
 
-Take note of how the Deployment created a ReplicaSet, which in turn created three Pods. This hierarchy forms the foundation of the Deployment's capabilities.
+!!!note
+    Take note of how the Deployment created a ReplicaSet, which in turn created three Pods.
+
+    This hierarchy forms the foundation of the Deployment's capabilities.
 
 Let's examine the deployment in more detail:
 
@@ -57,11 +62,13 @@ Let's examine the deployment in more detail:
 kubectl describe deployment nginx-deployment
 ```
 
-Note the key sections in the deployment description:
-- Replicas status (current/desired)
-- Update strategy
-- Pod template
-- Events
+!!!info
+    The key sections in the deployment description:
+
+    - Replicas status (current/desired)
+      - Update strategy
+      - Pod template
+      - Events
 
 ### Task 2: Performing a Rolling Update
 
@@ -80,11 +87,13 @@ Let's see what happened behind the scenes:
 ```bash
 # List the ReplicaSets
 kubectl get replicasets
-
-# Notice there are two ReplicaSets now - the original and the new one
 ```
 
-You should see two ReplicaSets - the original one (scaled to 0 replicas) and the new one (with 3 replicas).
+!!!info
+    You should see two ReplicaSets
+
+    - the original one (scaled to 0 replicas)
+    - the new one (with 3 replicas).
 
 Examine the rollout history:
 
@@ -247,7 +256,8 @@ kubectl set image deployment/nginx-deployment nginx=nginx:1.22
 kubectl rollout status deployment/nginx-deployment
 ```
 
-Note how Kubernetes respects the maxSurge and maxUnavailable parameters during the update.
+!!! note
+    Look at how Kubernetes respects the maxSurge and maxUnavailable parameters during the update.
 
 ### Task 7: Cleanup
 

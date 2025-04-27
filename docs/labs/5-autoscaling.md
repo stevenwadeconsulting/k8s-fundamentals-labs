@@ -20,7 +20,9 @@ By the end of this lab, you will be able to:
 
 - Completion of [Lab 4: Services and Networking](4-services.md)
 - Understanding of Deployments and resource management concepts
-- Execute `cd ../005-autoscaling` to navigate to this lab directory
+
+!!! warning
+    Execute `cd ../005-autoscaling` to navigate to this lab directory
 
 ## Lab Tasks
 
@@ -44,12 +46,13 @@ kubectl get deployment resource-demo
 kubectl describe pod -l app=resource-demo | grep -A3 Limits -B2
 ```
 
-Key points about resources:
+!!! info
+    Key points about resources:
 
-- CPU requests are specified in "millicores" (m). 100m = 0.1 CPU core
-- Memory requests are specified in bytes, or with suffixes like Mi (mebibyte) or Gi (gibibytes)
-- Resource requests are used for scheduling decisions
-- Resource limits are enforced by the container runtime
+    - CPU requests are specified in "millicores" (m). 100m = 0.1 CPU core
+    - Memory requests are specified in bytes, or with suffixes like Mi (mebibyte) or Gi (gibibytes)
+    - Resource requests are used for scheduling decisions
+    - Resource limits are enforced by the container runtime
 
 ### Task 2: Creating a Sample Application for Autoscaling
 
@@ -91,13 +94,14 @@ Let's examine what we created:
 kubectl describe hpa php-apache
 ```
 
-Key points about the HPA:
+!!! info
+    Key points about the HPA:
 
-- Target: The deployment we're scaling (php-apache)
-- Min and Max Replicas: The scaling boundaries (1-3 pods)
-- Target CPU Utilisation: 50% of the requested CPU
-- Current CPU Utilisation: The current average across all pods
-- Current Replicas: The current number of pods
+    - Target: The deployment we're scaling (php-apache)
+    - Min and Max Replicas: The scaling boundaries (1-3 pods)
+    - Target CPU Utilisation: 50% of the requested CPU
+    - Current CPU Utilisation: The current average across all pods
+    - Current Replicas: The current number of pods
 
 ### Task 4: Testing the Autoscaler
 
@@ -139,12 +143,13 @@ kubectl describe hpa php-apache
 
 Look at the "Events" section, which shows the scaling decisions that the HPA has made, including any scale-up or scale-down actions.
 
-The HPA controller follows these general rules:
+!!! note
+    The HPA controller follows these general rules:
 
-1. It checks metrics at a regular interval (default: 15 seconds)
-2. It calculates the desired number of replicas based on current/target metric values
-3. It applies a stabilisation window to prevent "thrashing" (rapid scaling up and down)
-4. It respects minimum and maximum replica constraints
+    1. It checks metrics at a regular interval (default: 15 seconds)
+    2. It calculates the desired number of replicas based on current/target metric values
+    3. It applies a stabilisation window to prevent "thrashing" (rapid scaling up and down)
+    4. It respects minimum and maximum replica constraints
 
 ### Task 6: Creating an Advanced HPA (v2)
 
@@ -162,12 +167,13 @@ kubectl get hpa
 kubectl describe hpa php-apache-v2
 ```
 
-Key features of this advanced HPA:
+!!! note
+    Key features of this advanced HPA:
 
-- Uses the newer v2 API which supports multiple metrics
-- Configures scaling behaviour for both scale-up and scale-down events
-- Scales down slowly (10% every 60 seconds, with a 300-second stabilization window)
-- Scales up quickly (either doubles the pod count or adds 4 pods every 15 seconds, whichever is higher)
+    - Uses the newer v2 API which supports multiple metrics
+    - Configures scaling behaviour for both scale-up and scale-down events
+    - Scales down slowly (10% every 60 seconds, with a 300-second stabilization window)
+    - Scales up quickly (either doubles the pod count or adds 4 pods every 15 seconds, whichever is higher)
 
 Let's test this new HPA by generating load again:
 
