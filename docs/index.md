@@ -1,39 +1,40 @@
-# Kubernetes Fundamentals Workshop
+# 🚢 Kubernetes Fundamentals Workshop
 
 Welcome to the Kubernetes Fundamentals Workshop! This hands-on workshop will guide you through the essential parts and concepts of Kubernetes, from fundamental architecture to production-ready implementations.
 
-## Workshop Overview
+<div style="padding: 15px; margin: 20px 0; background-color: #e1f5fe; border-left: 5px solid #03a9f4; border-radius: 4px;">
+<h3 style="margin-top: 0; color: #0277bd;">👨‍🏫 Meet Your Instructor</h3>
+<p>This workshop is led by an industry veteran with nearly a decade of hands-on Kubernetes experience, former Flux maintainer, and founder of the Cloud Native Club.</p>
+<p><a href="about-instructor">Learn more about your instructor →</a></p>
+</div>
+
+## 🔍 Workshop Overview
 
 This workshop provides a comprehensive introduction to Kubernetes - the industry-standard platform for container orchestration.
 Through a series of hands-on labs, you'll gain practical experience working with the key parts of Kubernetes and learn how to deploy, manage, and scale applications in a cloud-native environment.
 
-### What You'll Learn
+### 📚 What You'll Learn
 
-- Kubernetes architecture and core components
-- Deploying and managing applications with Deployments
-- Networking and service discovery fundamentals
-- Working with persistent storage solutions
-- Implementing auto-scaling configurations
-- Securing your applications with RBAC and Network Policies
-- Real-world best practices for production environments
+- **🏗️ Kubernetes Architecture**: Core components and how they work together
+- **🚀 Application Deployments**: Creating, updating, and scaling workloads
+- **🌐 Networking**: Service discovery and communication patterns
+- **💾 Persistent Storage**: Managing stateful applications and data
+- **⚖️ Auto-scaling**: Dynamically adjusting resources based on demand
+- **🔐 Security**: Implementing RBAC and network policies
+- **🛠️ Production Practices**: Real-world deployment strategies and patterns
 
-## Prerequisites
+## ✅ Prerequisites
 
 - Basic familiarity with containers and containerisation concepts
 - Comfort using command-line interfaces
 - Basic understanding of YAML syntax
 - All other necessary resources will be provided during the workshop
 
-## Lab Environment
+## 💻 Lab Environment
 
-Each participant will have access to a pre-configured two-node Kubernetes cluster running in Digital Ocean. The environment comes with all necessary tools installed, including:
+Each participant will have access to a pre-configured two-node Kubernetes cluster running in Digital Ocean. The environment comes with all necessary tools installed.
 
-- kubectl CLI
-- A fully functioning Kubernetes cluster
-- Access to required images and resources
-- This lab guide and associated YAML files
-
-## Getting Started
+## 🏁 Getting Started
 
 1. Log in to your assigned workshop environment using the credentials provided
 2. Verify your access to the Kubernetes cluster with:
@@ -48,80 +49,40 @@ Each participant will have access to a pre-configured two-node Kubernetes cluste
    cd examples
    ```
 
-## Workshop Labs
+## 🧪 Workshop Labs
 
 The workshop consists of eight hands-on labs, each focusing on different aspects of Kubernetes:
 
-1. **[Initial Kubernetes Exploration](labs/1-essentials.md)**
-    - Connecting to your cluster
-    - Essential kubectl commands
-    - Understanding namespaces
-    - Working with your first Pod
+1. **[🔰 Initial Kubernetes Exploration](labs/1-essentials.md)**
+2. **[📦 Deployments and Rolling Updates](labs/2-deployments.md)**
+3. **[🔄 DaemonSets](labs/3-daemonsets.md)**
+4. **[🌐 Services and Networking](labs/4-services.md)**
+5. **[⚖️ Horizontal Pod Autoscaling](labs/5-autoscaling.md)**
+6. **[💾 Persistent Storage](labs/6-storage.md)**
+7. **[🔒 Network Policies](labs/7-network-policies.md)**
+8. **[🔑 RBAC and Security](labs/8-rbac.md)**
+9. **[🏆 Comprehensive Final Exercise](labs/9-complete-app.md)**
 
-2. **[Deployments and Rolling Updates](labs/2-deployments.md)**
-    - Creating basic Deployments
-    - Performing rolling updates
-    - Working with ConfigMaps and Secrets
-    - Scaling and rollback procedures
+## 🔄 Workshop Flow
 
-3. **[DaemonSets](labs/3-daemonsets.md)**
-    - DaemonSet use cases
-    - Creating and managing DaemonSets
-    - Understanding DaemonSet scheduling
+<div style="padding: 15px; margin: 20px 0; background-color: #e3f2fd; border-left: 5px solid #2196f3; border-radius: 4px;">
+<p>Each lab follows a consistent structure to enhance your learning:</p>
+<ol>
+  <li><strong>Objective</strong>: What you'll learn in the lab</li>
+  <li><strong>Tasks</strong>: Step-by-step instructions with explanations</li>
+  <li><strong>Validation</strong>: How to verify your work</li>
+  <li><strong>Clean-up</strong>: Instructions to reset your environment after each exercise</li>
+</ol>
+<p><strong>Important</strong>: Please follow the clean-up instructions at the end of each lab to ensure your cluster resources remain available for later exercises.</p>
+</div>
 
-4. **[Services and Networking](labs/4-services.md)**
-    - Service types and usages
-    - Service-to-service communication
-    - DNS-based service discovery
-    - Exposing applications to external traffic
-
-5. **[Horizontal Pod Autoscaling](labs/5-autoscaling.md)**
-    - Resource requests and limits
-    - Creating Horizontal Pod Autoscalers
-    - Testing scaling behavior
-    - Advanced configuration options
-
-6. **[Persistent Storage](labs/6-storage.md)**
-    - Storage Classes
-    - Persistent Volumes and Claims
-    - Stateful applications with persistent storage
-    - Volume resize operations
-
-7. **[Network Policies](labs/7-network-policies.md)**
-    - Securing pod-to-pod communication
-    - Implementing default deny policies
-    - Allowing specific traffic patterns
-    - Testing and validating policies
-
-8. **[RBAC and Security](labs/8-rbac.md)**
-    - Service Accounts and permissions
-    - Creating Roles and RoleBindings
-    - Testing RBAC enforcement
-    - Security best practices
-
-9. **[Comprehensive Final Exercise](labs/9-complete-app.md)**
-    - Deploying a complete three-tier application
-    - Combining all workshop concepts
-    - Real-world deployment patterns
-
-## Workshop Flow
-
-Each lab includes four key sections:
-
-1. **Objective**: What you'll learn in the lab
-2. **Tasks**: Step-by-step instructions with explanations
-3. **Validation**: How to verify your work
-4. **Clean-up**: Instructions to reset your environment after each exercise
-
-**Important**: Please follow the clean-up instructions at the end of each lab to ensure your cluster resources remain available for later exercises.
-
-## Additional Resources
+## 📚 Additional Resources
 
 - [Kubernetes Official Documentation](https://kubernetes.io/docs/home/)
 - [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 - [CNCF Cloud Native Interactive Landscape](https://landscape.cncf.io/)
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 If you encounter any issues during the labs:
 
@@ -139,8 +100,10 @@ If you encounter any issues during the labs:
 
 3. Ask for assistance from the workshop instructor
 
-## Feedback
+## 💬 Feedback
 
-Your feedback is valuable! At the end of the workshop, please take a few minutes to share your thoughts by completing our [feedback form](https://forms.gle/HxoVhSZRNk49BweS9).
-
-Your input helps us improve future workshops and develop new content based on your needs and interests.
+<div style="padding: 15px; margin: 20px 0; background-color: #fff8e1; border-left: 5px solid #ffc107; border-radius: 4px;">
+<h3 style="margin-top: 0; color: #ff8f00;">📝 Your Feedback Matters!</h3>
+<p>At the end of the workshop, please take a few minutes to share your thoughts by completing our <a href="https://forms.gle/HxoVhSZRNk49BweS9">feedback form</a>.</p>
+<p>Your input helps us improve future workshops and develop new content based on your needs and interests.</p>
+</div>
