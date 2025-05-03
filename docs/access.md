@@ -28,7 +28,7 @@ https://devops-pro-europe-2025-k8s-workshop.lon1.digitaloceanspaces.com/particip
 
 ## 3️⃣ Follow the Web Instructions
 
-On the instructions page, you will find:
+On the instruction page, you will find:
 
 - SSH credentials for your bastion host
 - Details about your Kubernetes environment
