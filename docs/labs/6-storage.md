@@ -65,14 +65,14 @@ Note these key attributes for each storage class:
 Let's create a simple PVC using the default storage class:
 
 ```bash
-# Create a basic PVC
+# Create a basic PVC (1GB in size)
 kubectl apply -f basic-pvc.yaml
 
 # Check the status of your PVC
 kubectl get pvc
 ```
 
-Notice the PVC's status should be "Bound," indicating that a Persistent Volume (PV) has been automatically provisioned for your claim. Let's examine this PV:
+Notice the PVC's status should be "Bound" indicating that a Persistent Volume (PV) has been automatically provisioned for your claim. Let's examine this PV:
 
 ```bash
 # List all PVs
@@ -113,7 +113,7 @@ kubectl exec -it pvc-demo-pod -- bash -c "echo 'Hello from Kubernetes storage' >
 kubectl exec -it pvc-demo-pod -- cat /usr/share/nginx/html/index.html
 ```
 
-### Task 4: Testing Persistence Across Pod Restarts
+### Task 4: Testing Persistence During Pod Recreation
 
 Let's delete the pod and create a new one to verify that our data persists:
 
@@ -168,10 +168,8 @@ You should see that the file system is XFS, as specified by the storage class.
 One of the advantages of cloud-based storage is the ability to resize volumes. Let's expand one of our PVCs:
 
 ```bash
-# First check if your storage class supports expansion
+# First check if your storage class supports expansion (it should)
 kubectl get storageclass do-block-storage -o jsonpath='{.allowVolumeExpansion}'
-
-# Should return "true"
 
 # Resize the PVC
 kubectl patch pvc my-first-pvc -p '{"spec":{"resources":{"requests":{"storage":"2Gi"}}}}'

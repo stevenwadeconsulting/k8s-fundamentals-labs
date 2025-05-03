@@ -246,10 +246,10 @@ Inside the pod, run:
 ```bash
 # Look up the headless service
 nslookup backend-headless
-
-# You should see individual A records for each pod
-exit
 ```
+
+!!! info
+    You should see individual A records for each pod
 
 Unlike a regular service, DNS for a headless service:
 
