@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll learn about one of Kubernetes' most powerful concepts: Deployments. While Pods are the basic building blocks in Kubernetes, Deployments provide declarative updates and sophisticated lifecycle management for your applications.
+In this lab, you will learn about one of Kubernetes' most powerful concepts: Deployments. While Pods are the basic building blocks in Kubernetes, Deployments provide declarative updates and sophisticated lifecycle management for your applications.
 
 Deployments manage ReplicaSets, which in turn manage Pods, creating a powerful abstraction that handles scaling, updates, and self-healing for your applications. Understanding how to work with Deployments is essential for running production applications on Kubernetes.
 
@@ -183,13 +183,14 @@ kubectl rollout undo deployment/nginx-deployment --to-revision=1
 
 # Verify the image version
 kubectl describe deployment nginx-deployment | grep Image:
-
-# Notice the image version is back to nginx:1.20
 ```
+
+!!! note
+    Notice the image version is back to nginx:1.20
 
 ### Task 5: Working with ConfigMaps and Secrets
 
-In real applications, you often need to inject configuration and sensitive data. Let's see how to use ConfigMaps and Secrets with Deployments:
+In microservices, you often need to inject configuration and sensitive data. Let's see how to use ConfigMaps and Secrets with Deployments:
 
 First, create a ConfigMap:
 

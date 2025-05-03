@@ -4,7 +4,7 @@
 
 This final lab brings together all the concepts you've learned throughout the workshop into a single, comprehensive exercise. You'll deploy a complete three-tier application architecture with a frontend, backend API, and database—implementing best practices for configuration, security, networking, storage, and scaling.
 
-This real-world scenario will help solidify your understanding of how various Kubernetes components work together to create a resilient, secure, and scalable application. By the end of this exercise, you'll have hands-on experience with applying Kubernetes in a production-like environment.
+This real-world scenario will help solidify your understanding of how various Kubernetes components work together to create a resilient, secure, and scalable application. By the end of this exercise, you will have hands-on experience with applying Kubernetes in a production-like environment.
 
 ## Objectives
 

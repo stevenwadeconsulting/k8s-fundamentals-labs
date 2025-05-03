@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to your first hands-on lab with Kubernetes! In this lab, you'll establish a solid foundation by learning essential `kubectl` commands, exploring your cluster, and creating your first Kubernetes resources.
+Welcome to your first hands-on lab with Kubernetes! In this lab, you will establish a solid foundation by learning essential `kubectl` commands, exploring your cluster, and creating your first Kubernetes resources.
 
 A deep understanding of these fundamentals is critical before moving on to more complex Kubernetes concepts. This lab will give you the tools to navigate, inspect, and interact with any Kubernetes cluster.
 

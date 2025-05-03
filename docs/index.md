@@ -13,7 +13,7 @@ Welcome to the Kubernetes Fundamentals Workshop! This hands-on workshop will gui
 This workshop provides a comprehensive introduction to Kubernetes - the industry-standard platform for container orchestration.
 Through a series of hands-on labs, you'll gain practical experience working with the key parts of Kubernetes and learn how to deploy, manage, and scale applications in a cloud-native environment.
 
-### 📚 What You'll Learn
+### 📚 What You Will Learn
 
 - **🏗️ Kubernetes Architecture**: Core components and how they work together
 - **🚀 Application Deployments**: Creating, updating, and scaling workloads
@@ -34,24 +34,11 @@ Through a series of hands-on labs, you'll gain practical experience working with
 
 Each participant will have access to a pre-configured two-node Kubernetes cluster running in Digital Ocean. The environment comes with all necessary tools installed.
 
-## 🏁 Getting Started
-
-1. Log in to your assigned workshop environment using the credentials provided
-2. Verify your access to the Kubernetes cluster with:
-   ```bash
-   kubectl cluster-info
-   kubectl get nodes
-   ```
-3. Clone this repository to access lab files:
-   ```bash
-   git clone https://github.com/stevenwadeconsulting/k8s-fundamentals-labs.git
-   cd k8s-fundamentals-labs
-   cd examples
-   ```
+To access your environment, follow the instructions provided [here](access.md).
 
 ## 🧪 Workshop Labs
 
-The workshop consists of eight hands-on labs, each focusing on different aspects of Kubernetes:
+The workshop consists of nine hands-on labs, each focusing on different aspects of Kubernetes:
 
 1. **[🔰 Initial Kubernetes Exploration](labs/1-essentials.md)**
 2. **[📦 Deployments and Rolling Updates](labs/2-deployments.md)**
@@ -61,14 +48,14 @@ The workshop consists of eight hands-on labs, each focusing on different aspects
 6. **[💾 Persistent Storage](labs/6-storage.md)**
 7. **[🔒 Network Policies](labs/7-network-policies.md)**
 8. **[🔑 RBAC and Security](labs/8-rbac.md)**
-9. **[🏆 Comprehensive Final Exercise](labs/9-complete-app.md)**
+9. **[🏆 Comprehensive Final Exercise (Bonus)](labs/9-complete-app.md)**
 
 ## 🔄 Workshop Flow
 
 <div style="padding: 15px; margin: 20px 0; background-color: #e3f2fd; border-left: 5px solid #2196f3; border-radius: 4px;">
 <p>Each lab follows a consistent structure to enhance your learning:</p>
 <ol>
-  <li><strong>Objective</strong>: What you'll learn in the lab</li>
+  <li><strong>Objective</strong>: What you will learn in the lab</li>
   <li><strong>Tasks</strong>: Step-by-step instructions with explanations</li>
   <li><strong>Validation</strong>: How to verify your work</li>
   <li><strong>Clean-up</strong>: Instructions to reset your environment after each exercise</li>

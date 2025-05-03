@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll explore DaemonSets, a specialised Kubernetes workload resource that ensures that a copy of a Pod runs on every node in the cluster (or a subset of nodes). Unlike Deployments, which are designed to run a specified number of replicas, DaemonSets are node-centric.
+In this lab, you will explore DaemonSets, a specialised Kubernetes workload resource that ensures that a copy of a Pod runs on every node in the cluster (or a subset of nodes). Unlike Deployments, which are designed to run a specified number of replicas, DaemonSets are node-centric.
 
 DaemonSets are particularly useful for infrastructure-related workloads like monitoring agents, log collectors, and network plugins—cases where you need exactly one instance of a service per node.
 
@@ -208,7 +208,7 @@ kubectl scale deployment comparison-deployment --replicas=3
 kubectl get pods -l app=comparison -o wide
 ```
 
-The new Deployment pod will avoid the cordoned node. But what about our DaemonSet?
+Now lets uncordon our node to allow scheduling again:
 
 ```bash
 # Uncordon the node

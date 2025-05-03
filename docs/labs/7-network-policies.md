@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll explore Kubernetes Network Policies, which provide the ability to control network traffic flow between pods, namespaces, and external endpoints.
+In this lab, you will explore Kubernetes Network Policies, which provide the ability to control network traffic flow between pods, namespaces, and external endpoints.
 
 By default, all pods in a Kubernetes cluster can communicate with any other pod and reach out to any available endpoint. Network Policies act as firewalls, allowing you to enforce rules about which connections are allowed.
 
@@ -41,9 +41,9 @@ Before diving into hands-on examples, let's understand the key components of Net
 
 Network Policies are namespace-scoped resources, meaning they only apply to pods within the namespace they're created in.
 
-### Task 2: Creating a Test Environment
+### Task 2: Creating a Test Namespace
 
-Let's set up a test environment with multiple applications to demonstrate Network Policies:
+Let's set up a test namespace with multiple applications to demonstrate Network Policies:
 
 ```bash
 # Create a namespace for this exercise
@@ -195,7 +195,7 @@ sleep 5
 kubectl run test-from-default --image=busybox --rm -it --restart=Never -n default -- wget -O- --timeout=2 http://backend.netpol-test
 ```
 
-The test pod in the default namespace should now be able to connect to the backend service.
+The test pod in the `default` namespace should now be able to connect to the backend service in the `netpol-test` namespace.
 
 ### Task 10: Creating an Egress Policy
 
