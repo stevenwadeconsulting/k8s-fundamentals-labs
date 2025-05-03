@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll explore Kubernetes Network Policies, which provide the ability to control network traffic flow between pods, namespaces, and external endpoints.
+In this lab, you will explore Kubernetes Network Policies, which provide the ability to control network traffic flow between pods, namespaces, and external endpoints.
 
 By default, all pods in a Kubernetes cluster can communicate with any other pod and reach out to any available endpoint. Network Policies act as firewalls, allowing you to enforce rules about which connections are allowed.
 

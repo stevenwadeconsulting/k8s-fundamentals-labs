@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll learn how to use persistent storage in Kubernetes. By default, storage in Kubernetes pods is ephemeral—when a pod is restarted or rescheduled, any data written to the container's filesystem is lost. For applications that need to persist data (databases, file servers, etc.), Kubernetes provides persistent storage solutions.
+In this lab, you will learn how to use persistent storage in Kubernetes. By default, storage in Kubernetes pods is ephemeral—when a pod is restarted or rescheduled, any data written to the container's filesystem is lost. For applications that need to persist data (databases, file servers, etc.), Kubernetes provides persistent storage solutions.
 
 You'll explore Storage Classes, Persistent Volumes (PVs), and Persistent Volume Claims (PVCs), which together form Kubernetes' storage abstraction system. This abstraction allows applications to request and use storage resources without needing to know the specific details of the underlying storage infrastructure.
 

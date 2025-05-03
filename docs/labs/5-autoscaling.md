@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll explore Horizontal Pod Autoscaling (HPA), a Kubernetes feature that automatically scales the number of pod replicas based on observed metrics such as CPU utilisation. Autoscaling is essential for applications with variable workloads, allowing your infrastructure to adapt to changing demands automatically.
+In this lab, you will explore Horizontal Pod Autoscaling (HPA), a Kubernetes feature that automatically scales the number of pod replicas based on observed metrics such as CPU utilisation. Autoscaling is essential for applications with variable workloads, allowing your infrastructure to adapt to changing demands automatically.
 
 The HPA controller periodically adjusts the number of replicas in a Deployment, ReplicaSet, or StatefulSet to match the observed metrics with the target values you specify. This helps ensure your applications remain responsive under load while optimising resource usage during periods of low activity.
 

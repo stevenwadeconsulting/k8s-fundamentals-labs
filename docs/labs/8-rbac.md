@@ -2,13 +2,13 @@
 
 ## Introduction
 
-In this lab, you'll explore Role-Based Access Control (RBAC) in Kubernetes, which is a crucial mechanism for securing your cluster.
+In this lab, you will explore Role-Based Access Control (RBAC) in Kubernetes, which is a crucial mechanism for securing your cluster.
 
 RBAC allows you to control who can access the Kubernetes API and what actions they can perform. This security model is essential for multi-tenant clusters and environments with strict security requirements.
 
 You'll learn how to create and manage service accounts, roles, and role bindings, and understand how they work together to provide fine-grained access control.
 
-Additionally, you'll see how pods can use service accounts to interact with the Kubernetes API securely.
+Additionally, you will see how pods can use service accounts to interact with the Kubernetes API securely.
 
 ## Objectives
 
@@ -381,4 +381,4 @@ Here are some RBAC best practices to keep in mind:
 
 ## Next Steps
 
-Proceed to [Lab 9: Comprehensive Final Exercise](9-complete-app.md) where you'll bring together all the concepts you've learned in this workshop to deploy a complete three-tier application.
+Proceed to [Lab 9: Comprehensive Final Exercise](9-complete-app.md) where you will bring together all the concepts you've learned in this workshop to deploy a complete three-tier application.

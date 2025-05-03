@@ -8,7 +8,7 @@ site_dir: public
 # Page tree
 nav:
   - Home: index.md
-  - About Your Instructor: about-instructor.md
+  - Accessing Your Cluster: access.md
   - Labs:
       - 1. Initial Exploration: labs/1-essentials.md
       - 2. Deployments: labs/2-deployments.md
@@ -18,8 +18,10 @@ nav:
       - 6. Persistent Storage: labs/6-storage.md
       - 7. Network Policies: labs/7-network-policies.md
       - 8. Role-Based Access Control: labs/8-rbac.md
-      - 9. Final Exercise: labs/9-complete-app.md
-  - Provide Feedback: https://forms.gle/HxoVhSZRNk49BweS9
+      - 9. Final Exercise (bonus): labs/9-complete-app.md
+  - Resources:
+    - About Your Instructor: about-instructor.md
+    - Provide Feedback: https://forms.gle/HxoVhSZRNk49BweS9
 
 # Configuration
 theme:

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-In this lab, you'll learn about Kubernetes Services, which provide stable networking for your applications. While Pods can come and go (they're ephemeral), Services provide a consistent way to access your applications regardless of which Pods are running or where they're located in the cluster.
+In this lab, you will learn about Kubernetes Services, which provide stable networking for your applications. While Pods can come and go (they're ephemeral), Services provide a consistent way to access your applications regardless of which Pods are running or where they're located in the cluster.
 
 Kubernetes Services are essential for reliable microservice architectures, enabling seamless communication between application components and providing access to your applications from outside the cluster.
 
@@ -184,7 +184,10 @@ kubectl run load-test --image=busybox:1.28 -- /bin/sh -c 'while true; do wget -q
 kubectl logs -f load-test
 ```
 
-You should see responses coming from different backend pods, demonstrating that the service is load-balancing requests. Press Ctrl+C to stop following the logs.
+!!! note
+    You should see responses coming from different backend pods, demonstrating that the service is load-balancing requests.
+
+Press Ctrl+C to stop following the logs.
 
 ### Task 7: Using Labels and Selectors with Services
 
